@@ -15,8 +15,8 @@ module.exports = {
 
   async execute(sock, msg, args) {
     try {
-      // Get instance-specific config
-      const instanceConfig = config.getConfigFromSocket(sock);
+      // Get config directly (Səhv funksiya təmizləndi)
+      const instanceConfig = config;
 
       const text = args.join(' ');
       const chatId = msg.key.remoteJid;
@@ -89,7 +89,7 @@ module.exports = {
         video: { url: videoData.download },
         mimetype: 'video/mp4',
         fileName: `${(videoData.title || videoTitle || 'video').replace(/[^\w\s-]/g, '')}.mp4`,
-        caption: `*${videoData.title || videoTitle || 'Video'}*\n\n> *_Downloaded by ${instanceConfig.botName}_*`
+        caption: `*${videoData.title || videoTitle || 'Video'}*\n\n> *_Downloaded by ${instanceConfig.botName || 'NexusMD ⚡'}_*`
       }, { quoted: msg });
 
     } catch (error) {
