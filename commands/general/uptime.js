@@ -55,10 +55,10 @@ const botName = config.botName || 'Bot';
 const botVersion = 'V1.0.2';
       
       // Build response message
-      let message = `╭━━『 *Bot Uptime* 』━━╮\n\n`;
-    message += `🤖 *Bot Name:* ${botName}\n`;
+      let message = `╭━━『 *Bot Işləyir* 』━━╮\n\n`;
+    message += `🤖 *Bot Adı:* ${botName}\n`;
     message += `🧬 *Bot Version:* ${botVersion}\n`;
-      message += `⏱️ *Uptime:* ${uptime}\n`;
+      message += `⏱️ *İşləyir:* ${uptime}\n`;
       message += `\n╰━━━━━━━━━━━━━━━╯`;
       
       await extra.reply(message);
