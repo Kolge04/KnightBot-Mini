@@ -1,11 +1,11 @@
 const axios = require('axios');
 
 module.exports = {
-  name: 'getpp',
-  aliases: ['gp', 'getpic'],
+  name: 'pp',
+  aliases: ['gp', 'pr'],
   category: 'general',
   description: 'Get profile picture of a user',
-  usage: '.getpp (reply to message or tag user)',
+  usage: '.pp (reply to message or tag user)',
   
   async execute(sock, msg, args, extra) {
     try {
@@ -28,7 +28,7 @@ module.exports = {
       }
       
       if (!targetUser) {
-        return extra.reply('❌ Could not identify target user. Please reply to a message or tag a user.');
+        return extra.reply('❌ Hədəf istifadəçini müəyyən etmək mümkün olmadı. Mesaja cavab verin və ya istifadəçini işarələyin.');
       }
       
       try {
@@ -46,7 +46,7 @@ module.exports = {
         // Send the profile picture
         await sock.sendMessage(extra.from, { 
           image: buffer,
-          caption: `👤 Profile picture of @${targetUser.split('@')[0]}`,
+          caption: `👤 Profil şəkli @${targetUser.split('@')[0]}`,
           mentions: [targetUser]
         }, { quoted: msg });
         
@@ -56,14 +56,14 @@ module.exports = {
             profileError.output?.statusCode === 404 || 
             profileError.output?.statusCode === 500 ||
             profileError.message?.includes('not found')) {
-          return extra.reply('❌ Profile picture not found for this user.');
+          return extra.reply('❌ Bu istifadəçi üçün profil şəkli tapılmadı..');
         } else if (profileError.output?.statusCode === 401 || 
                    profileError.message?.includes('forbidden') || 
                    profileError.message?.includes('unauthorized')) {
-          return extra.reply('❌ Profile picture not found. The user\'s profile picture is private or not available.');
+          return extra.reply('❌ Profil şəkli tapılmadı. İstifadəçinin profil şəkli şəxsidir və ya mövcud deyil.');
         } else {
           // Don't show error in console for normal cases, just inform user
-          return extra.reply('❌ Profile picture not found for this user.');
+          return extra.reply('❌ Bu istifadəçi üçün profil şəkli tapılmadı.');
         }
       }
       
