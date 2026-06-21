@@ -7,7 +7,7 @@ const { loadCommands } = require('../../utils/commandLoader');
 
 module.exports = {
   name: 'menu',
-  aliases: ['help', 'commands'],
+  aliases: ['help', 'commands', 'menyu'],
   category: 'general',
   description: 'Show all available commands',
   usage: '.menu',
@@ -39,7 +39,7 @@ module.exports = {
       // General Commands
       if (categories.general) {
         menuText += `┏━━━━━━━━━━━━━━━━━\n`;
-        menuText += `┃ 🧭 GENERAL COMMAND\n`;
+        menuText += `┃ 🧭 ÜMUMI ƏMR\n`;
         menuText += `┗━━━━━━━━━━━━━━━━━\n`;
         categories.general.forEach(cmd => {
           menuText += `│ ➜ ${config.prefix}${cmd.name}\n`;
@@ -50,7 +50,7 @@ module.exports = {
       // AI Commands
       if (categories.ai) {
         menuText += `┏━━━━━━━━━━━━━━━━━\n`;
-        menuText += `┃ 🤖 AI COMMAND\n`;
+        menuText += `┃ 🤖 AI ƏMRI\n`;
         menuText += `┗━━━━━━━━━━━━━━━━━\n`;
         categories.ai.forEach(cmd => {
           menuText += `│ ➜ ${config.prefix}${cmd.name}\n`;
@@ -61,7 +61,7 @@ module.exports = {
       // Group Commands
       if (categories.group) {
         menuText += `┏━━━━━━━━━━━━━━━━━\n`;
-        menuText += `┃ 🔵 GROUP COMMAND\n`;
+        menuText += `┃ 🔵 QRUP ƏMRI\n`;
         menuText += `┗━━━━━━━━━━━━━━━━━\n`;
         categories.group.forEach(cmd => {
           menuText += `│ ➜ ${config.prefix}${cmd.name}\n`;
@@ -72,7 +72,7 @@ module.exports = {
       // Admin Commands
       if (categories.admin) {
         menuText += `┏━━━━━━━━━━━━━━━━━\n`;
-        menuText += `┃ 🛡️ ADMIN COMMAND\n`;
+        menuText += `┃ 🛡️ ADMIN ƏMRI\n`;
         menuText += `┗━━━━━━━━━━━━━━━━━\n`;
         categories.admin.forEach(cmd => {
           menuText += `│ ➜ ${config.prefix}${cmd.name}\n`;
@@ -83,7 +83,7 @@ module.exports = {
       // Owner Commands
       if (categories.owner) {
         menuText += `┏━━━━━━━━━━━━━━━━━\n`;
-        menuText += `┃ 👑 OWNER COMMAND\n`;
+        menuText += `┃ 👑 RƏHBƏR ƏMRI\n`;
         menuText += `┗━━━━━━━━━━━━━━━━━\n`;
         categories.owner.forEach(cmd => {
           menuText += `│ ➜ ${config.prefix}${cmd.name}\n`;
@@ -94,7 +94,7 @@ module.exports = {
       // Media Commands
       if (categories.media) {
         menuText += `┏━━━━━━━━━━━━━━━━━\n`;
-        menuText += `┃ 🎞️ MEDIA COMMAND\n`;
+        menuText += `┃ 🎞️ MEDIA ƏMRI\n`;
         menuText += `┗━━━━━━━━━━━━━━━━━\n`;
         categories.media.forEach(cmd => {
           menuText += `│ ➜ ${config.prefix}${cmd.name}\n`;
@@ -105,7 +105,7 @@ module.exports = {
       // Fun Commands
       if (categories.fun) {
         menuText += `┏━━━━━━━━━━━━━━━━━\n`;
-        menuText += `┃ 🎭 FUN COMMAND\n`;
+        menuText += `┃ 🎭 ƏYLƏNCƏ ƏMRI\n`;
         menuText += `┗━━━━━━━━━━━━━━━━━\n`;
         categories.fun.forEach(cmd => {
           menuText += `│ ➜ ${config.prefix}${cmd.name}\n`;
@@ -116,7 +116,7 @@ module.exports = {
       // Utility Commands
       if (categories.utility) {
         menuText += `┏━━━━━━━━━━━━━━━━━\n`;
-        menuText += `┃ 🔧 UTILITY COMMAND\n`;
+        menuText += `┃ 🔧 ƏLAVƏ ƏMR\n`;
         menuText += `┗━━━━━━━━━━━━━━━━━\n`;
         categories.utility.forEach(cmd => {
           menuText += `│ ➜ ${config.prefix}${cmd.name}\n`;
@@ -127,7 +127,7 @@ module.exports = {
        // Anime Commands
        if (categories.anime) {
         menuText += `┏━━━━━━━━━━━━━━━━━\n`;
-        menuText += `┃ 👾 ANIME COMMAND\n`;
+        menuText += `┃ 👾 ANIME ƏMRI\n`;
         menuText += `┗━━━━━━━━━━━━━━━━━\n`;
         categories.anime.forEach(cmd => {
           menuText += `│ ➜ ${config.prefix}${cmd.name}\n`;
@@ -138,7 +138,7 @@ module.exports = {
        // Textmaker Commands
        if (categories.utility) {
         menuText += `┏━━━━━━━━━━━━━━━━━\n`;
-        menuText += `┃ 🖋️ TEXTMAKER COMMAND\n`;
+        menuText += `┃ 🖋️ ƏYLƏNCƏ ƏMRI\n`;
         menuText += `┗━━━━━━━━━━━━━━━━━\n`;
         categories.textmaker.forEach(cmd => {
           menuText += `│ ➜ ${config.prefix}${cmd.name}\n`;
@@ -147,8 +147,8 @@ module.exports = {
       }
       
       menuText += `╰━━━━━━━━━━━━━━━━━\n\n`;
-      menuText += `💡 Type ${config.prefix}help <command> for more info\n`;
-      menuText += `🌟 Bot Version: 1.0.0\n`;
+      menuText += `💡 Əlavə məlumat üçün ${config.prefix}help <ƏMR> yazın\n`;
+      menuText += `🌟 Bot Versiyası: 1.0.0\n`;
       
       // Send menu with image
       const fs = require('fs');
@@ -180,7 +180,7 @@ module.exports = {
       }
       
     } catch (error) {
-      await extra.reply(`❌ Error: ${error.message}`);
+      await extra.reply(`❌ Xəta: ${error.message}`);
     }
   }
 };
