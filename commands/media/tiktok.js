@@ -76,13 +76,15 @@ module.exports = {
         let videoUrl = null;
         let title = null;
         
-        // Try Siputzx API first
+        // Use TikWM API - more stable
         try {
-          const result = await APIs.getTikTokDownload(url);
-          videoUrl = result.videoUrl;
-          title = result.title;
+          const response = await axios.post('https://www.tikwm.com/api/', { url: url });
+          if (response.data && response.data.data) {
+             videoUrl = response.data.data.play;
+             title = response.data.data.title;
+          }
         } catch (apiError) {
-          console.error(`Siputzx API failed: ${apiError.message}`);
+          console.error(`TikWM API failed: ${apiError.message}`);
         }
         
         // If Siputzx API didn't work, try ttdl method
