@@ -31,10 +31,10 @@ module.exports = {
       const displayOwner = ownerNames[0] || config.ownerName || 'Bot Owner';
       
       let menuText = `╭━━『 *${config.botName}* 』━━╮\n\n`;
-      menuText += `👋 Hello @${extra.sender.split('@')[0]}!\n\n`;
-      menuText += `⚡ Prefix: ${config.prefix}\n`;
-      menuText += `📦 Total Commands: ${commands.size}\n`;
-      menuText += `👑 Owner: ${displayOwner}\n\n`;
+      menuText += `👋 Salam @${extra.sender.split('@')[0]}!\n\n`;
+      menuText += `⚡ Prefiks: ${config.prefix}\n`;
+      menuText += `📦 Ümumi Əmrlər: ${commands.size}\n`;
+      menuText += `👑 Rəhbər: ${displayOwner}\n\n`;
       
       // General Commands
       if (categories.general) {
