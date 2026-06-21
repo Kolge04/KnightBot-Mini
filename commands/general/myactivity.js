@@ -3,10 +3,10 @@
 const { getStats } = require('../../utils/groupstats');
 
 module.exports = {
-    name: 'myactivity',
-    aliases: ['mystats', 'mymsgs', 'rank'],
+    name: 'mystat',
+    aliases: ['myactivity', 'minfo', 'rank'],
     category: 'general',
-    description: 'Check your activity stats for today',
+    description: 'Bu gün üçün fəaliyyət statistikanızı yoxlayın',
     usage: '.myactivity',
     groupOnly: true,
 
@@ -17,7 +17,7 @@ module.exports = {
             const stats = getStats(from);
 
             if (!stats || !stats.users || !stats.users[sender]) {
-                return extra.reply('📊 You haven\'t sent any messages today yet!');
+                return extra.reply('📊 Bu gün hələ heç bir mesaj göndərməmisiniz!');
             }
 
             const userCount = stats.users[sender];
@@ -31,14 +31,14 @@ module.exports = {
             const rank = sortedUsers.findIndex(([id]) => id === sender) + 1;
 
             const text = `
-📊 *Your Activity Today*
+📊 *Bugünkü Fəaliyyətiniz*
 
 👤 *User:* @${sender.split('@')[0]}
-📝 *Messages Sent:* ${userCount}
-📈 *Your Share:* ${percentage}%
-🏆 *Rank:* #${rank} of ${sortedUsers.length}
+📝 * Mesaj sayı:* ${userCount}
+📈 *Sizin Paylaşımınız:* ${percentage}%
+🏆 *Rütbə:* #${rank} of ${sortedUsers.length}
 
-Keep chatting! 💬
+Söhbətə davam edin! 💬
 `.trim();
 
             await sock.sendMessage(from, {
@@ -48,7 +48,7 @@ Keep chatting! 💬
 
         } catch (err) {
             console.error('[myactivity cmd] error:', err);
-            extra.reply('❌ Error loading your activity stats.');
+            extra.reply('❌ Fəaliyyət statistikanızı yükləyərkən xəta baş verdi.');
         }
     }
 };
