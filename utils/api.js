@@ -25,16 +25,26 @@ const APIs = {
     }
   },
   
-  // AI Chat - Shizo API
-  chatAI: async (text) => {
+ // AI Chat - New CodeGenerator API
+  chatAI: async (text, chatId = "default_chat") => {
     try {
-      const response = await api.get(`https://api.shizo.top/ai/gpt?apikey=shizo&query=${encodeURIComponent(text)}`);
-      if (response.data && response.data.msg) {
-        return { msg: response.data.msg };
+      const response = await api.post(`https://aicodegenerator.ifscswiftcodeapp.in/api.php`, {
+        message: [{ type: "text", text: text }],
+        chatId: String(chatId),
+        generatorType: "CodeGenerator"
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Mozilla/5.0'
+        }
+      });
+
+      if (response.data && response.data.response) {
+        return response.data.response;
       }
-      return response.data;
+      return "⚠️ Cavab tapılmadı.";
     } catch (error) {
-      throw new Error('Failed to get AI response');
+      throw new Error('Failed to get AI response from CodeGenerator');
     }
   },
   
