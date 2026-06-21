@@ -18,8 +18,8 @@ module.exports = {
             const chatId = extra.from;
             
             // GitHub repository URL
-            const repoUrl = 'https://github.com/mruniquehacker/KnightBot-Mini';
-            const apiUrl = 'https://api.github.com/repos/mruniquehacker/KnightBot-Mini';
+            const repoUrl = 'https://github.com/Kolge04/KnightBot-Mini';
+            const apiUrl = 'https://api.github.com/repos/Kolge04/KnightBot-Mini';
             
             // Send loading message
             const loadingMsg = await extra.reply('🔍 Fetching GitHub repository information...');
@@ -28,7 +28,7 @@ module.exports = {
                 // Fetch repository data from GitHub API
                 const response = await axios.get(apiUrl, {
                     headers: {
-                        'User-Agent': 'KnightBot-Mini'
+                        'User-Agent': 'NexusMD ⚡'
                     }
                 });
                 
@@ -68,7 +68,7 @@ module.exports = {
                 
                 let fallbackMessage = `╭━━『 *GitHub Repository* 』━━╮\n\n`;
                 fallbackMessage += `🤖 *Bot Name:* ${config.botName}\n`;
-                fallbackMessage += `🔗 *Repository:* KnightBot-Mini\n`;
+                fallbackMessage += `🔗 *Repository:* NexusMD ⚡\n`;
                 fallbackMessage += `👨‍💻 *Owner:* mruniquehacker\n`;
                 fallbackMessage += `🌐 *URL:* ${repoUrl}\n\n`;
                 fallbackMessage += `⚠️ *Note:* Unable to fetch real-time statistics.\n`;
