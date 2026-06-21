@@ -75,12 +75,12 @@ function cleanupPuppeteerCache() {
     const cacheDir = path.join(home, '.cache', 'puppeteer');
 
     if (fs.existsSync(cacheDir)) {
-      console.log('🧹 Removing Puppeteer cache at:', cacheDir);
+      console.log('🧹 Puppeteer önbelleği silinir:', cacheDir);
       fs.rmSync(cacheDir, { recursive: true, force: true });
-      console.log('✅ Puppeteer cache removed');
+      console.log('✅ Kukla keşi silindi');
     }
   } catch (err) {
-    console.error('⚠️ Failed to cleanup Puppeteer cache:', err.message || err);
+    console.error('⚠️ Puppeteer keşini təmizləmək alınmadı:', err.message || err);
   }
 }
 // Optimized in-memory store with hard limits (Map-based for better memory management)
@@ -197,7 +197,7 @@ async function startBot() {
       const [header, b64data] = config.sessionID.split('!');
 
       if (header !== 'KnightBot' || !b64data) {
-        throw new Error("❌ Invalid session format. Expected 'KnightBot!.....'");
+        throw new Error("❌ Yanlış sessiya formatı. Gözlənilən 'NexusMD!.....'");
       }
 
       const cleanB64 = b64data.replace('...', '');
@@ -211,7 +211,7 @@ async function startBot() {
 
       // Write decompressed session data to creds.json
       fs.writeFileSync(sessionFile, decompressedData, 'utf8');
-      console.log('📡 Session : 🔑 Retrieved from KnightBot Session');
+      console.log('📡 Sessiya : 🔑 NexusMD Sessiyasından alındı');
 
     } catch (e) {
       console.error('📡 Session : ❌ Error processing KnightBot session:', e.message);
@@ -296,13 +296,13 @@ async function startBot() {
         setTimeout(() => startBot(), 3000);
       }
     } else if (connection === 'open') {
-      console.log('\n✅ Bot connected successfully!');
-      console.log(`📱 Bot Number: ${sock.user.id.split(':')[0]}`);
-      console.log(`🤖 Bot Name: ${config.botName}`);
+      console.log('\n✅ Bot uğurla qoşuldu!');
+      console.log(`📱 Bot Hesabı: ${sock.user.id.split(':')[0]}`);
+      console.log(`🤖 Bot Adı: ${config.botName}`);
       console.log(`⚡ Prefix: ${config.prefix}`);
       const ownerNames = Array.isArray(config.ownerName) ? config.ownerName.join(',') : config.ownerName;
-      console.log(`👑 Owner: ${ownerNames}\n`);
-      console.log('Bot is ready to receive messages!\n');
+      console.log(`👑 Rəhbər: ${ownerNames}\n`);
+      console.log('Bot mesajları qəbul etməyə hazırdır!\n');
 
       // Set bot status
       if (config.autoBio) {
@@ -455,7 +455,7 @@ async function startBot() {
   return sock;
 }
 // Start the bot
-console.log('🚀 Starting WhatsApp MD Bot...\n');
+console.log('🚀 WhatsApp MD Bot işə salınır...\n');
 console.log(`📦 Bot Name: ${config.botName}`);
 console.log(`⚡ Prefix: ${config.prefix}`);
 const ownerNames = Array.isArray(config.ownerName) ? config.ownerName.join(',') : config.ownerName;
