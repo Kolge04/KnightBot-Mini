@@ -18,11 +18,11 @@ module.exports = {
       }
       
       const question = args.join(' ');
+      const chatId = msg.key.remoteJid; // Hər çatın öz yaddaşı olması üçün ID götürürük
       
-      const response = await APIs.chatAI(question);
+      // Yeni yazdığımız funksiyaya həm sualı, həm də çat ID-sini göndəririk
+      const answer = await APIs.chatAI(question, chatId);
       
-      // Send only the answer without labels
-      const answer = response.response || response.msg || response.data?.msg || response;
       await extra.reply(answer);
       
     } catch (error) {
