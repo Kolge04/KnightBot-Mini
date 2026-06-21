@@ -4,8 +4,8 @@ module.exports = {
   name: 'pp',
   aliases: ['gp', 'pr'],
   category: 'general',
-  description: 'Get profile picture of a user',
-  usage: '.pp (reply to message or tag user)',
+  description: 'İstifadəçinin profil şəklini əldə edin',
+  usage: '.pp (mesajı cavablandırın və ya istifadəçini etiketləyin)',
   
   async execute(sock, msg, args, extra) {
     try {
