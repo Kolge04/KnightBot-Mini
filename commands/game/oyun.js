@@ -74,7 +74,7 @@ async function novbetiSozeKec(sock, chatId) {
     }
 
     const yeniSoz = sessiya.sozler[sessiya.sozIndex];
-    await etibarliMesajGonder(sock, chatId, `⏰ *Vaxt tamam oldu! Növbəti sözə keçirik:* \n\n💡 İpucu: _${yeniSoz.ipucu}_\n🔍 Söz: *${yeniSoz.şablon}* \n\n📝 _Cavab vermək üçün başına nöqtə qoyun! Məsələn: .${yeniSoz.cavab.toLowerCase()}_`);
+    await etibarliMesajGonder(sock, chatId, `⏰ *Vaxt tamam oldu! Növbəti sözə keçirik:* \n\n💡 İpucu: _${yeniSoz.ipucu}_\n🔍 Söz: *${yeniSoz.şablon}*`);
 
     sessiya.sozTaymeri = setTimeout(() => {
         novbetiSozeKec(sock, chatId);
@@ -83,14 +83,11 @@ async function novbetiSozeKec(sock, chatId) {
 
 module.exports = {
     name: 'game',
-    // Bütün hərfləri bura əlavə edirik ki, nöqtə ilə başlayan istənilən cavab koda daxil ola bilsin
-    aliases: [
-        'gm', 'oyun', 'join', 'unjoin', 'stop', 'top', 'xal', 'ipucu', 'user', 'clear', 'reset',
-        'a','b','c','ç','d','e','ə','f','g','ğ','h','x','ı','i','j','k','q','l','m','n','o','ö','p','r','s','ş','t','u','ü','v','y','z'
-    ],
+    aliases: ['gm', 'oyun', 'join', 'unjoin', 'stop', 'top', 'xal', 'ipucu', 'user', 'clear', 'reset', 'game_internal_answer'],
     category: 'game',
-    description: 'Söz oyunu mexanizmi, idarəetmə, sıfırlama sistemləri ilə',
+    description: 'Nöqtəli və Nöqtəsiz cavab dəstəkli, sıfırlama sistemli söz oyunu',
     usage: '.oyun, .join, .stop, .top, .xal, .ipucu, .clear, .reset',
+    oyunlar, // handler.js-in oxuya bilməsi üçün çölə çıxarırıq
 
     async execute(sock, msg, args, options) {
         try {
@@ -107,10 +104,17 @@ module.exports = {
             else if (msg.message) textContent = msg.message.conversation || msg.message.extendedTextMessage?.text || '';
             textContent = textContent.trim();
 
+            // Əmri təyin edirik (Bu daxili nöqtəsiz cavabdır yoxsa normal əmr)
             let activeCmd = '';
             if (textContent.startsWith(config.prefix)) {
                 activeCmd = textContent.slice(config.prefix.length).trim().split(/\s+/)[0].toLowerCase();
+            } else if (options && options.reply) {
+                // Əgər handler.js bunu xüsusi daxili adla yönləndiribsə
+                if (msg.body === undefined && textContent) activeCmd = 'game_internal_answer';
             }
+            
+            // Framework-ün bəzi versiyalarında daxili ad birbaşa commandName kimi gələ bilər
+            if (args && args._commandName === 'game_internal_answer') activeCmd = 'game_internal_answer';
 
             if (!usersCollection) return;
 
@@ -118,24 +122,24 @@ module.exports = {
             // 🛠️ YENİ ƏMRLƏR: CLEAR VƏ RESET
             // ==========================================
             
-            // --- CLEAR (Bütün bazadakı xalları sıfırlayır) ---
+            // --- CLEAR: Bütün bazadakı istifadəçilərin xallarını 0 edir ---
             if (activeCmd === 'clear') {
                 await usersCollection.updateMany({}, { $set: { xal: 0 } });
                 await etibarliMesajGonder(sock, chatId, '♻️ Verilənlər bazasındakı bütün istifadəçilərin xalları sıfırlandı!', [], msg);
                 return;
             }
 
-            // --- RESET (Reply edilən, nömrəsi yazılan və ya @etiket edilən adamın xalını sıfırlayır) ---
+            // --- RESET: Reply, @etiket və ya nömrə ilə xal sıfırlayır ---
             if (activeCmd === 'reset') {
                 let targetUser = null;
 
-                // 1. Üsul: Əgər mesaj reply (cavab) edilibsə
-                const quotedMessage = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
-                if (quotedMessage) {
-                    targetUser = msg.message.extendedTextMessage.contextInfo.participant;
+                // 1. Üsul: Mesaj cavablanıbsa (Reply)
+                const quotedParticipant = msg.message?.extendedTextMessage?.contextInfo?.participant;
+                if (quotedParticipant) {
+                    targetUser = quotedParticipant;
                 }
 
-                // 2. Üsul: Əgər @etiket (mention) edilibsə
+                // 2. Üsul: @etiket edilibsə (Mention)
                 if (!targetUser) {
                     const mentions = msg.message?.extendedTextMessage?.contextInfo?.mentionedJid;
                     if (mentions && mentions.length > 0) {
@@ -143,8 +147,8 @@ module.exports = {
                     }
                 }
 
-                // 3. Üsul: Əgər birbaşa nömrə yazılıbsa (Məs: .reset 99450xxxxxxx)
-                if (!targetUser && rawText) {
+                // 3. Üsul: Birbaşa nömrə yazılıbsa (.reset 99450xxxxxxx)
+                if (!targetUser) {
                     const temizNomre = textContent.split(' ')[1]?.replace(/[^0-9]/g, '');
                     if (temizNomre) {
                         targetUser = `${temizNomre}@s.whatsapp.net`;
@@ -156,13 +160,13 @@ module.exports = {
                     const t_clean = targetUser.split('@')[0];
                     await etibarliMesajGonder(sock, chatId, `🧹 @${t_clean} istifadəçisinin xalı sıfırlandı.`, [targetUser], msg);
                 } else {
-                    await etibarliMesajGonder(sock, chatId, '⚠️ *İstifadə qaydası:*\n1. Bir mesajı cavablayaraq `.reset` yazın.\n2. `.reset @istifadeci` şəklində etiketləyin.\n3. `.reset 99477xxxxxxx` nömrə ilə yazın.', [], msg);
+                    await etibarliMesajGonder(sock, chatId, '⚠️ *İstifadə qaydası:*\n1. Mesajı cavablayaraq `.reset` yazın.\n2. `.reset @istifadeci` şəklində etiketləyin.\n3. `.reset 99477xxxxxxx` nömrə ilə yazın.', [], msg);
                 }
                 return;
             }
 
             // ==========================================
-            // 🎮 OYUN ƏMRLƏRİ
+            // 🎮 OYUN MEXANİZMİ VƏ IDARƏETMƏ
             // ==========================================
 
             // --- MENYU ---
@@ -176,7 +180,7 @@ module.exports = {
                 `📊 ➔ .xal (Sizin cari xalınız)\n` +
                 `🏆 ➔ .top (Liderlər reytinq cədvəli)\n` +
                 `🛑 ➔ .stop (Aktiv oyunu dayandırır)\n\n` +
-                `📝 *Vacib Qeyd:* Cavabları yazarkən mütləq əvvəlinə nöqtə qoyun! Məsələn: *.alma* , *.kitab*`;
+                `📝 *Qeyd:* Cavabları yazarkən artıq başına nöqtə qoymağa ehtiyac yoxdur! Birbaşa yazın (Məs: Alma).`;
                 
                 await etibarliMesajGonder(sock, chatId, menuTxt, [], msg);
                 return;
@@ -203,7 +207,7 @@ module.exports = {
                 const sessiya = oyunlar[chatId];
                 const cariSoz = sessiya.sozler[sessiya.sozIndex];
 
-                const startMesaji = `🎮 *SÖZ OYUNU BAŞLADI!* 🎮\n\n👤 Oyunu başladan və ilk qoşulan: @${cleanSender}\n📢 Digər iştirakçılar qoşulmaq üçün *.join* yazmalıdır!\n\n⏱️ *HƏR SÖZ ÜÇÜN CƏMİ 7 SANİYƏNİZ VAR!*\n\n💡 İpucu: _${cariSoz.ipucu}_\n🔍 Söz: *${cariSoz.şablon}* \n\n📝 _Cavab vermək üçün başına nöqtə qoyun! Məsələn: .${cariSoz.cavab.toLowerCase()}_`;
+                const startMesaji = `🎮 *SÖZ OYUNU BAŞLADI!* 🎮\n\n👤 Oyunu başladan və ilk qoşulan: @${cleanSender}\n📢 Digər iştirakçılar qoşulmaq üçün *.join* yazmalıdır!\n\n⏱️ *HƏR SÖZ ÜÇÜN CƏMİ 7 SANİYƏNİZ VAR!*\n\n💡 İpucu: _${cariSoz.ipucu}_\n🔍 Söz: *${cariSoz.şablon}*`;
 
                 await etibarliMesajGonder(sock, chatId, startMesaji, [senderId], msg);
                 
@@ -326,18 +330,17 @@ module.exports = {
             }
 
             // ==========================================
-            // 🎯 CAVAB MEXANİZMİ (Artıq Nöqtəli Gələn Cavabları Oxuyur)
+            // 🎯 NÖQTƏSİZ CAVAB MEXANİZMİ
             // ==========================================
-            if (oyunlar[chatId] && oyunlar[chatId].aktiv && activeCmd) {
+            if (oyunlar[chatId] && oyunlar[chatId].aktiv) {
                 const sessiya = oyunlar[chatId];
                 if (!sessiya.oyuncular.has(senderId)) return;
                 
-                // .alma yazılıbsa activeCmd "alma" olacaq
-                const cleanedText = activeCmd.trim().toLowerCase();
+                const clearedText = textContent.trim().toLowerCase();
                 const cariSoz = sessiya.sozler[sessiya.sozIndex];
 
-                // Əgər yazılan əmr birbaşa düzgün cavaba bərabərdirsə
-                if (cleanedText === cariSoz.cavab.toLowerCase()) {
+                // Əgər gələn mesaj tam olaraq düzgün cavaba bərabərdirsə
+                if (clearedText === cariSoz.cavab.toLowerCase()) {
                     if (sessiya.sozTaymeri) clearTimeout(sessiya.sozTaymeri);
                     sessiya.dogruCavabTapildi = true;
 
@@ -347,9 +350,8 @@ module.exports = {
                     await etibarliMesajGonder(sock, chatId, `✅ *Doğru Cavab! @${cleanSender} (+10 Xal)*\n📊 Ümumi Balansınız: *${updatedDoc.xal} xal*`, [senderId], msg);
                     novbetiSozeKec(sock, chatId);
                 } else {
-                    // Əgər yazılan şey digər əsas əmrlər deyil, sadəcə səhv cavabdırsa xal çıxılır
-                    const esasEmrler = ['game', 'gm', 'oyun', 'join', 'unjoin', 'stop', 'top', 'xal', 'ipucu', 'user', 'clear', 'reset'];
-                    if (!esasEmrler.includes(cleanedText)) {
+                    // Səhv cavab yazılıbsa və bu hər hansı başqa bir əmr `.oyun`, `.stop` deyil saniyədə -5 xal çıxılır
+                    if (!textContent.startsWith(config.prefix)) {
                         let userDoc = await usersCollection.findOne({ userId: senderId });
                         let currentXal = userDoc ? userDoc.xal : 0;
                         if (currentXal > 0) {
