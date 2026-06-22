@@ -19,10 +19,10 @@ const AXIOS_DEFAULTS = {
 
 module.exports = {
   name: 'song',
-  aliases: ['play', 'music', 'yta'],
+  aliases: ['play', 'music'],
   category: 'media',
-  description: 'Download audio from YouTube',
-  usage: '.song <song name or YouTube link>',
+  description: 'YouTube-dan audio yükləyin',
+  usage: '.mahnı <mahnı adı və ya YouTube linki>',
   
   async execute(sock, msg, args) {
     try {
@@ -52,7 +52,7 @@ module.exports = {
       // Inform user
       await sock.sendMessage(chatId, {
         image: { url: video.thumbnail },
-        caption: `🎵 Downloading: *${video.title}*\n⏱ Duration: ${video.timestamp}`
+        caption: `🎵 Yüklənir: *${video.title}*\n⏱ Müddət: ${video.timestamp}`
       }, { quoted: msg });
       
       // Try multiple APIs with fallback chain
@@ -141,7 +141,7 @@ module.exports = {
               if (streamStatusCode === 451) {
                 console.log(`Stream download blocked (451) from ${apiMethod.name}, trying next API...`);
               } else {
-                console.log(`Stream download failed from ${apiMethod.name}:`, streamErr.message);
+                console.log(`Buradan yayım endirilmədi ${apiMethod.name}:`, streamErr.message);
               }
               continue; // Try next API
             }
@@ -155,7 +155,7 @@ module.exports = {
       
       // If all APIs failed, throw error
       if (!downloadSuccess || !audioBuffer) {
-        throw new Error('All download sources failed. The content may be unavailable or blocked in your region.');
+        throw new Error('Bütün endirmə mənbələri uğursuz oldu. Məzmun sizin bölgənizdə mövcud olmaya və ya bloklana bilər.');
       }
 
       // Validate buffer
@@ -264,13 +264,13 @@ module.exports = {
       console.error('Song command error:', err);
       
       // Provide more specific error messages
-      let errorMessage = '❌ Failed to download song.';
+      let errorMessage = '❌ Musiqini endirmək alınmadı.';
       if (err.message && err.message.includes('blocked')) {
-        errorMessage = '❌ Download blocked. The content may be unavailable in your region or due to legal restrictions.';
+        errorMessage = '❌ Endirmə bloklandı. Məzmun bölgənizdə və ya qanuni məhdudiyyətlərə görə əlçatan olmaya bilər.';
       } else if (err.response?.status === 451 || err.status === 451) {
-        errorMessage = '❌ Content unavailable (451). This may be due to legal restrictions or regional blocking.';
-      } else if (err.message && err.message.includes('All download sources failed')) {
-        errorMessage = '❌ All download sources failed. The content may be unavailable or blocked.';
+        errorMessage = '❌ Məzmun mövcud deyil (451). Bu, qanuni məhdudiyyətlər və ya regional bloklama ilə bağlı ola bilər.';
+      } else if (err.message && err.message.includes('Bütün endirmə mənbələri uğursuz oldu')) {
+        errorMessage = '❌ Bütün endirmə mənbələri uğursuz oldu. Məzmun əlçatan olmaya və ya bloklana bilər.';
       }
       
       await sock.sendMessage(msg.key.remoteJid, { 
