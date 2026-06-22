@@ -86,7 +86,7 @@ module.exports = {
     aliases: ['gm', 'oyun', 'join', 'unjoin', 'stop', 'top', 'xal', 'ipucu', 'user', 'clear', 'reset', 'game_internal_answer'],
     category: 'fun',
     description: 'Nöqtəli və Nöqtəsiz cavab dəstəkli, sıfırlama sistemli söz oyunu',
-    usage: 'gm', 'oyun', 'join', 'unjoin', 'stop', 'top', 'xal', 'ipucu', 'user',
+    usage: '.gm, .oyun, .join, .unjoin, .stop, .top, .xal, .ipucu, .user',
     oyunlar, // handler.js-in oxuya bilməsi üçün çölə çıxarırıq
 
     async execute(sock, msg, args, options) {
