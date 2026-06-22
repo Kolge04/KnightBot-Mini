@@ -443,7 +443,7 @@ const handleMessage = async (sock, msg) => {
     
     // from already defined above in DM block check
     const sender = msg.key.fromMe ? sock.user.id.split(':')[0] + '@s.whatsapp.net' : msg.key.participant || msg.key.remoteJid;
-    const isGroup = from.endsWith('@g.us'); // Should always be true now due to DM block above
+    const isGroup = from.endsWith('@g.us') || from.endsWith('@lid'); // Həm g.us, həm də lid qruplarını dəstəkləyirik
     
     // Fetch group metadata immediately if it's a group
     const groupMetadata = isGroup ? await getGroupMetadata(sock, from) : null;
