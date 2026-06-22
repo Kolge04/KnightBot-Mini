@@ -84,12 +84,18 @@ module.exports = {
         // Baileys üçün mesaj məlumatlarını təhlükəsiz şəkildə alırıq
         if (!message) return;
         
+        // 🌟 XƏTANIN QARŞISINI ALMAQ ÜÇÜN BURA ƏLAVƏ EDİLDİ:
+        if (!message.from) message.from = message.key?.remoteJid;
+        
         // Knightbot framework-ünə uyğun chatId və senderId təyini
-        const chatId = message.key?.remoteJid;
+        const chatId = message.from || message.key?.remoteJid;
         if (!chatId) return;
 
         const senderId = message.key.participant || message.key.remoteJid;
-        const isGroup = chatId.endsWith('@g.us');
+        
+        // 🌟 @lid QRUPLARINI DƏSTƏKLƏMƏK ÜÇÜN BU SƏTİR DƏYİŞDİRİLDİ:
+        const isGroup = typeof chatId === 'string' && (chatId.endsWith('@g.us') || chatId.endsWith('@lid'));
+        
         const cleanSender = senderId ? senderId.split('@')[0].split(':')[0] : 'Oyunçu';
 
         if (!usersCollection) return;
@@ -108,14 +114,14 @@ module.exports = {
             await client.sendMessage(chatId, { 
                 text: `🎮 *SÖZ OYUNU BOT MENYUSU:* 🎮\n\n` +
                 `*👥 Qrup Daxili Komandalar:* \n` +
-                `🎮 ➔ .oyun (Söz oyununu başladır)\n` +
-                `➕ ➔ .join (Oyuna rəsmi qoşulur)\n` +
-                `🚪 ➔ .unjoin (Oyundan ayrılır)\n` +
-                `👥 ➔ .user (Aktiv oyunçu siyahısı)\n` +
-                `💡 ➔ .ipucu (Gizli söz üçün ipucu -5 Xal)\n` +
-                `📊 ➔ .xal (Sizin cari xalınız)\n` +
-                `🏆 ➔ .top (Liderlər reytinq cədvəli)\n` +
-                `🛑 ➔ .stop (Aktiv oyunu dayandırır)\n`
+                `*🎮 ➔ .oyun (Söz oyununu başladır)*\n` +
+                `*➕ ➔ .join (Oyuna rəsmi qoşulur)*\n` +
+                `*🚪 ➔ .unjoin (Oyundan ayrılır)*\n` +
+                `*👥 ➔ .user (Aktiv oyunçu siyahısı)*\n` +
+                `*💡 ➔ .ipucu (Gizli söz üçün ipucu -5 Xal)*\n` +
+                `*📊 ➔ .xal (Sizin cari xalınız)*\n` +
+                `*🏆 ➔ .top (Liderlər reytinq cədvəli)*\n` +
+                `*🛑 ➔ .stop (Aktiv oyunu dayandırır)*\n`
             }, { quoted: message });
             return;
         }
