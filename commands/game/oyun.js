@@ -37,7 +37,6 @@ function oyunuMexanikiDayandir(chatId) {
     }
 }
 
-// Həm birbaşa client, həm də handler-dən gələn ötürücülərlə uyğunlaşdırılmış mesaj göndərmə
 async function etibarliMesajGonder(client, chatId, text, mentions = [], message = null) {
     try {
         if (client && typeof client.sendMessage === 'function') {
@@ -87,14 +86,14 @@ module.exports = {
     name: 'game',
     aliases: ['gm', 'oyun'],
     category: 'game',
-    description: 'Qarışıq söz oyunu mexanizmi',
+    description: 'Qarışıq söz oyununu idarə edir',
     usage: '.game, .oyun, .join, .stop, .top, .xal',
 
-    // 🌟 Framework-ün ORİJİNAL PARAMETR SIRALAMASI BƏRPA EDİLDİ
-    async execute(client, message, cmd, rawText, args) {
+    async execute(client, message) {
         try {
             if (!message) return;
             
+            // Framework-ü sığortalayırıq
             if (!message.from) message.from = message.key?.remoteJid;
             const chatId = message.from || message.key?.remoteJid;
             if (!chatId) return;
@@ -103,13 +102,20 @@ module.exports = {
             const isGroup = true; 
             const cleanSender = senderId ? senderId.split('@')[0].split(':')[0] : 'Oyunçu';
 
-            // Framework-dən gələn cmd dəyişənini təmizləyirik
-            const activeCmd = cmd ? cmd.toLowerCase().trim() : '';
-
-            // Yazılan mətnin özünü təmiz şəkildə alırıq (Cavablar üçün)
-            let textContent = (rawText || '').trim();
-            if (!textContent && message.message) {
+            // Mesajın mətnini tam zəmanətli şəkildə alırıq
+            let textContent = '';
+            if (message.body) {
+                textContent = message.body;
+            } else if (message.message) {
                 textContent = message.message.conversation || message.message.extendedTextMessage?.text || '';
+            }
+            textContent = textContent.trim();
+
+            // Əmri təyin edirik (Məsələn: .oyun yazılıbsa -> oyun)
+            let activeCmd = '';
+            const prefixler = ['.', '/', '!'];
+            if (prefixler.includes(textContent[0])) {
+                activeCmd = textContent.slice(1).trim().split(/\s+/)[0].toLowerCase();
             }
 
             if (!usersCollection) return;
@@ -274,13 +280,13 @@ module.exports = {
                 return;
             }
 
-            // --- CAVAB MEXANİZMİ (Heç bir əmr daxil edilməyibsə)
+            // --- CAVAB MEXANİZMİ (Hər hansı bir əmr yazılmayıbsa düzgün cavabı yoxlayır)
             if (oyunlar[chatId] && oyunlar[chatId].aktiv && !activeCmd) {
                 const sessiya = oyunlar[chatId];
                 if (!sessiya.oyuncular.has(senderId)) return;
                 
-                const clearedText = textContent.trim().toLowerCase();
-                if (clearedText.includes(" ") || clearedText.startsWith('.')) return;
+                const clearedText = textContent.toLowerCase();
+                if (clearedText.includes(" ")) return;
 
                 const cariSoz = sessiya.sozler[sessiya.sozIndex];
 
