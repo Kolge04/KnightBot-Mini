@@ -754,10 +754,53 @@ const handleMessage = async (sock, msg) => {
     } catch (e) {
       // Silently ignore if tictactoe command doesn't exist or has errors
     }
+
+
+
+
+
+
+
+
+
     
     
-    // Check if message starts with prefix
-    if (!body.startsWith(config.prefix)) return;
+    // === OYUN ÜÇÜN ÖZƏL KEÇİD ===
+    let isGameAnswer = false;
+    let commandName = '';
+    let args = [];
+
+    // Əgər qrupda aktiv oyun varsa və yazılan mesaj nöqtə ilə başlamırsa
+    if (isGroup && !body.startsWith(config.prefix)) {
+        try {
+            // oyun Modulunu müvəqqəti çağırıb yoxlayırıq
+            const oyunModulu = require('./commands/game/oyun');
+            if (oyunModulu.oyunlar && oyunModulu.oyunlar[from] && oyunModulu.oyunlar[from].aktiv) {
+                // Əgər istifadəçi oyuna rəsmi qoşulubsa, mesajı birbaşa oyun əmrinə yönləndir
+                if (oyunModulu.oyunlar[from].oyuncular.has(sender)) {
+                    isGameAnswer = true;
+                    commandName = 'game_internal_answer'; // Xüsusi daxili ad veririk
+                    args = body.split(/\s+/);
+                }
+            }
+        } catch (e) {
+            console.error("Oyun keçid xətası:", e);
+        }
+    }
+
+    // Əgər oyun cavabı deyilsə, normal prefix yoxlamasını apar
+    if (!isGameAnswer) {
+        if (!body.startsWith(config.prefix)) return;
+        args = body.slice(config.prefix.length).trim().split(/\s+/);
+        commandName = args.shift().toLowerCase();
+    }
+
+
+
+
+
+
+    
     
     // Parse command
     const args = body.slice(config.prefix.length).trim().split(/\s+/);
