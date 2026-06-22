@@ -81,10 +81,19 @@ module.exports = {
     usage: '.game, .oyun, .join, .stop, .top, .xal',
 
     async execute(client, message, cmd, rawText, args) {
+        // Əgər message və ya message.from mövcut deyilsə, funksiyanı dayandır ki, bot çökməsin
+        if (!message || !message.from) return;
+
         const chatId = message.from;
         const senderId = message.author || message.from;
-        const isGroup = chatId.endsWith('@g.us');
-        const cleanSender = senderId.split('@')[0].split(':')[0];
+        
+        // chatId-nin təhlükəsiz şəkildə string olduğunu yoxlayırıq
+        const isGroup = typeof chatId === 'string' && chatId.endsWith('@g.us');
+        
+        // senderId təhlükəsizlik yoxlaması
+        const cleanSender = senderId && typeof senderId === 'string' 
+            ? senderId.split('@')[0].split(':')[0] 
+            : 'İstifadəçi';
 
         if (!usersCollection) return;
 
