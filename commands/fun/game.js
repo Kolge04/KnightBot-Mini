@@ -78,7 +78,7 @@ async function novbetiSozeKec(sock, chatId) {
 
     sessiya.sozTaymeri = setTimeout(() => {
         novbetiSozeKec(sock, chatId);
-    }, 10000);
+    }, 25000);
 }
 
 module.exports = {
@@ -209,7 +209,7 @@ if (activeCmd === 'reset') {
                 const sessiya = oyunlar[chatId];
                 const cariSoz = sessiya.sozler[sessiya.sozIndex];
 
-                const startMesaji = `🎮 *SÖZ OYUNU BAŞLADI!* 🎮\n\n👤 Oyunu başladan və ilk qoşulan: @${cleanSender}\n📢 Digər iştirakçılar qoşulmaq üçün *.join* yazmalıdır!\n\n⏱️ *HƏR SÖZ ÜÇÜN CƏMİ 10 SANİYƏNİZ VAR!*\n\n💡 İpucu: _${cariSoz.ipucu}_\n🔍 Söz: *${cariSoz.şablon}*`;
+                const startMesaji = `🎮 *SÖZ OYUNU BAŞLADI!* 🎮\n\n👤 Oyunu başladan və ilk qoşulan: @${cleanSender}\n📢 Digər iştirakçılar qoşulmaq üçün *.join* yazmalıdır!\n\n⏱️ *HƏR SÖZ ÜÇÜN CƏMİ 25 SANİYƏNİZ VAR!*\n\n💡 İpucu: _${cariSoz.ipucu}_\n🔍 Söz: *${cariSoz.şablon}*`;
 
                 await etibarliMesajGonder(sock, chatId, startMesaji, [senderId], msg);
                 
