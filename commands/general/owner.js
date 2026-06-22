@@ -40,7 +40,7 @@ END:VCARD
                 }
             });
 
-            await extra.reply('👑 Here is the contact of my *Owner*.');
+            await extra.reply('👑 Budur mənim *Sahibimin əlaqəsi*.');
 
         } catch (error) {
             console.error('Owner command error:', error);
