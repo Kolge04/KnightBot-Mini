@@ -84,7 +84,7 @@ async function novbetiSozeKec(sock, chatId) {
 module.exports = {
     name: 'game',
     aliases: ['gm', 'oyun', 'join', 'unjoin', 'stop', 'top', 'xal', 'ipucu', 'user', 'clear', 'reset', 'game_internal_answer'],
-    category: 'game',
+    category: 'fun',
     description: 'Nöqtəli və Nöqtəsiz cavab dəstəkli, sıfırlama sistemli söz oyunu',
     usage: 'gm', 'oyun', 'join', 'unjoin', 'stop', 'top', 'xal', 'ipucu', 'user',
     oyunlar, // handler.js-in oxuya bilməsi üçün çölə çıxarırıq
