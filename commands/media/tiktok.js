@@ -12,10 +12,10 @@ const processedMessages = new Set();
 
 module.exports = {
   name: 'tiktok',
-  aliases: ['tt', 'ttdl', 'tiktokdl'],
+  aliases: ['tt'],
   category: 'media',
-  description: 'Download TikTok videos',
-  usage: '.tiktok <TikTok URL>',
+  description: 'TikTok videolarını yükləyin',
+  usage: '.tiktok <TikTok LINK>',
   
   async execute(sock, msg, args) {
     try {
@@ -38,7 +38,7 @@ module.exports = {
       
       if (!text) {
         return await sock.sendMessage(msg.key.remoteJid, { 
-          text: 'Please provide a TikTok link for the video.' 
+          text: 'Zəhmət olmasa video üçün TikTok linkini təqdim edin.' 
         }, { quoted: msg });
       }
       
@@ -47,7 +47,7 @@ module.exports = {
       
       if (!url) {
         return await sock.sendMessage(msg.key.remoteJid, { 
-          text: 'Please provide a TikTok link for the video.' 
+          text: 'Zəhmət olmasa video üçün TikTok linkini təqdim edin.' 
         }, { quoted: msg });
       }
       
@@ -64,12 +64,12 @@ module.exports = {
       
       if (!isValidUrl) {
         return await sock.sendMessage(msg.key.remoteJid, { 
-          text: 'That is not a valid TikTok link. Please provide a valid TikTok video link.' 
+          text: 'Bu etibarlı TikTok bağlantısı deyil. Zəhmət olmasa etibarlı TikTok video linki təqdim edin.' 
         }, { quoted: msg });
       }
       
       await sock.sendMessage(msg.key.remoteJid, {
-        react: { text: '🔄', key: msg.key }
+        react: { text: '🔎', key: msg.key }
       });
       
       try {
@@ -84,7 +84,7 @@ module.exports = {
              title = response.data.data.title;
           }
         } catch (apiError) {
-          console.error(`TikWM API failed: ${apiError.message}`);
+          console.error(`TikWM API uğursuz oldu: ${apiError.message}`);
         }
         
         // If Siputzx API didn't work, try ttdl method
@@ -102,12 +102,12 @@ module.exports = {
                   await sock.sendMessage(msg.key.remoteJid, {
                     video: { url: mediaUrl },
                     mimetype: 'video/mp4',
-                    caption: `*DOWNLOADED BY ${config.botName.toUpperCase()}*`
+                    caption: `*Yüklədi... ${config.botName.toUpperCase()}*`
                   }, { quoted: msg });
                 } else {
                   await sock.sendMessage(msg.key.remoteJid, {
                     image: { url: mediaUrl },
-                    caption: `*DOWNLOADED BY ${config.botName.toUpperCase()}*`
+                    caption: `*Yüklədi... ${config.botName.toUpperCase()}*`
                   }, { quoted: msg });
                 }
               }
@@ -139,11 +139,11 @@ module.exports = {
             const videoBuffer = Buffer.from(videoResponse.data);
             
             if (videoBuffer.length === 0) {
-              throw new Error('Video buffer is empty');
+              throw new Error('Video buferi boşdur');
             }
             
             const botName = config.botName.toUpperCase();
-            const caption = title ? `*DOWNLOADED BY ${botName}*\n\n📝 Title: ${title}` : `*DOWNLOADED BY ${botName}*`;
+            const caption = title ? `*Yüklədi.. ${botName}*\n\n📝 Başlıq: ${title}` : `*Yüklədi.. ${botName}*`;
             
             await sock.sendMessage(msg.key.remoteJid, {
               video: videoBuffer,
@@ -157,7 +157,7 @@ module.exports = {
             // Fallback to URL method
             try {
               const botName = config.botName.toUpperCase();
-              const caption = title ? `*DOWNLOADED BY ${botName}*\n\n📝 Title: ${title}` : `*DOWNLOADED BY ${botName}*`;
+              const caption = title ? `*Yüklədi.. ${botName}*\n\n📝 Başlıq: ${title}` : `*Yüklədi... ${botName}*`;
               
               await sock.sendMessage(msg.key.remoteJid, {
                 video: { url: videoUrl },
@@ -166,26 +166,26 @@ module.exports = {
               }, { quoted: msg });
               return;
             } catch (urlError) {
-              console.error(`URL method also failed: ${urlError.message}`);
+              console.error(`URL metodu da uğursuz oldu: ${urlError.message}`);
             }
           }
         }
         
         // If we reach here, no method worked
         return await sock.sendMessage(msg.key.remoteJid, { 
-          text: '❌ Failed to download TikTok video. All download methods failed. Please try again with a different link.' 
+          text: '❌ TikTok videosunu endirmək alınmadı. Bütün endirmə üsulları uğursuz oldu. Lütfən, başqa link ilə yenidən cəhd edin.' 
         }, { quoted: msg });
         
       } catch (error) {
-        console.error('Error in TikTok download:', error);
+        console.error('TikTok yükləməsində xəta:', error);
         await sock.sendMessage(msg.key.remoteJid, { 
-          text: 'Failed to download the TikTok video. Please try again with a different link.' 
+          text: 'TikTok videosunu endirmək alınmadı. Lütfən, başqa link ilə yenidən cəhd edin.' 
         }, { quoted: msg });
       }
     } catch (error) {
-      console.error('Error in TikTok command:', error);
+      console.error('TikTok əmrində xəta:', error);
       await sock.sendMessage(msg.key.remoteJid, { 
-        text: 'An error occurred while processing the request. Please try again later.' 
+        text: 'Sorğunu emal edərkən xəta baş verdi. Lütfən, sonra yenidən cəhd edin.' 
       }, { quoted: msg });
     }
   }
