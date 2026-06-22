@@ -1,8 +1,7 @@
 /**
- * Facebook Downloader - Download Facebook videos
+ * Facebook Downloader - Fixed 403 Forbidden Issue & Translated to AZ
  */
 
-const { facebookdl } = require('@bochilteam/scraper-facebook');
 const axios = require('axios');
 const config = require('../../config');
 
@@ -36,14 +35,14 @@ module.exports = {
                    args.join(' ');
       
       if (!text) {
-        return await extra.reply('Please provide a Facebook link for the video.');
+        return await extra.reply('Zəhmət olmasa video üçün Facebook linki daxil edin.');
       }
       
       // Extract URL from command
       const url = text.split(' ').slice(1).join(' ').trim();
       
       if (!url) {
-        return await extra.reply('Please provide a Facebook link for the video.');
+        return await extra.reply('Zəhmət olmasa video üçün Facebook linki daxil edin.');
       }
       
       // Check for various Facebook URL formats
@@ -58,7 +57,7 @@ module.exports = {
       const isValidUrl = facebookPatterns.some(pattern => pattern.test(url));
       
       if (!isValidUrl) {
-        return await extra.reply('That is not a valid Facebook link. Please provide a valid Facebook video link.');
+        return await extra.reply('Bu keçərli bir Facebook linki deyil. Zəhmət olmasa doğru bir video linki daxil edin.');
       }
       
       await sock.sendMessage(extra.from, {
@@ -66,109 +65,88 @@ module.exports = {
       });
       
       try {
-        // Use @bochilteam/scraper-facebook
-        const data = await facebookdl(url);
+        // Bloklanan köhnə paket yerinə yeni stabil API sorğusu
+        const apiRes = await axios.get(`https://api.siputzx.my.id/api/d/facebook?url=${encodeURIComponent(url)}`, { timeout: 30000 });
         
-        if (!data || !data.video || !Array.isArray(data.video) || data.video.length === 0) {
-          throw new Error('No video data found');
+        if (!apiRes.data || !apiRes.data.status || !apiRes.data.data) {
+          throw new Error('Video məlumatları tapılmadı');
+        }
+
+        const apiData = apiRes.data.data;
+        
+        // Mövcud kodun strukturunu qorumaq üçün eyni video massivi simulyasiya edirik
+        const videoQualityUrls = [];
+        if (apiData.hd) videoQualityUrls.push({ quality: 'HD', downloadUrl: apiData.hd });
+        if (apiData.sd) videoQualityUrls.push({ quality: 'SD', downloadUrl: apiData.sd });
+        
+        if (videoQualityUrls.length === 0) {
+          throw new Error('Yükləmək üçün video linki tapılmadı (HD/SD)');
         }
         
-        // Get the highest quality video (first in array is usually highest)
-        const videoOption = data.video[0];
-        if (!videoOption || !videoOption.download) {
-          throw new Error('No video download function found');
-        }
+        // Ən yüksək keyfiyyətli variantı seçirik
+        const videoOption = videoQualityUrls[0];
+        const videoUrl = videoOption.downloadUrl;
         
-        // Call the download function to get the video URL or buffer
-        const videoData = await videoOption.download();
-        
-        let videoUrl = null;
         let videoBuffer = null;
-        
-        // Check if it's a URL or buffer
-        if (typeof videoData === 'string') {
-          videoUrl = videoData;
-        } else if (Buffer.isBuffer(videoData)) {
-          videoBuffer = videoData;
-        } else if (videoData && videoData.url) {
-          videoUrl = videoData.url;
-        } else if (videoData && videoData.data) {
-          videoBuffer = Buffer.from(videoData.data);
-        } else {
-          throw new Error('Invalid video data format');
-        }
         
         // Build caption with video info
         const botName = config.botName.toUpperCase();
-        let caption = `*DOWNLOADED BY ${botName}*`;
+        let caption = `*YÜKLƏDİ: ${botName}*`;
         
         const parts = [];
         
-        if (data.duration) {
-          parts.push(`⏱️ Duration: ${data.duration}`);
+        if (apiData.title) {
+          parts.push(`📝 Başlıq: ${apiData.title.slice(0, 60)}...`);
         }
         
         if (videoOption.quality) {
-          parts.push(`📹 Quality: ${videoOption.quality}`);
+          parts.push(`📹 Keyfiyyət: ${videoOption.quality}`);
         }
         
         if (parts.length > 0) {
           caption += '\n\n' + parts.join('\n');
         }
         
-        // Send video
-        if (videoBuffer) {
-          // Send as buffer
+        // Birbaşa URL metodu (Try URL first)
+        try {
           await sock.sendMessage(extra.from, {
-            video: videoBuffer,
+            video: { url: videoUrl },
             mimetype: 'video/mp4',
             caption: caption
           }, { quoted: msg });
-        } else if (videoUrl) {
-          // Try URL first
+        } catch (urlError) {
+          // Əgər birbaşa link uğursuz olarsa, server tərəfə buffer kimi çəkirik
+          console.error('URL ilə göndərmə uğursuz oldu, buffer metodu yoxlanılır:', urlError.message);
           try {
+            const videoResponse = await axios.get(videoUrl, {
+              responseType: 'arraybuffer',
+              timeout: 60000,
+              maxContentLength: 100 * 1024 * 1024,
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Referer': 'https://www.facebook.com/'
+              }
+            });
+            
+            const buffer = Buffer.from(videoResponse.data);
             await sock.sendMessage(extra.from, {
-              video: { url: videoUrl },
+              video: buffer,
               mimetype: 'video/mp4',
               caption: caption
             }, { quoted: msg });
-          } catch (urlError) {
-            // If URL fails, download and send as buffer
-            console.error('URL send failed, trying buffer method:', urlError.message);
-            try {
-              const videoResponse = await axios.get(videoUrl, {
-                responseType: 'arraybuffer',
-                timeout: 60000,
-                maxContentLength: 100 * 1024 * 1024,
-                headers: {
-                  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                  'Referer': 'https://www.facebook.com/'
-                }
-              });
-              
-              const buffer = Buffer.from(videoResponse.data);
-              await sock.sendMessage(extra.from, {
-                video: buffer,
-                mimetype: 'video/mp4',
-                caption: caption
-              }, { quoted: msg });
-            } catch (bufferError) {
-              console.error('Buffer method also failed:', bufferError.message);
-              throw new Error('Failed to send video');
-            }
+          } catch (bufferError) {
+            console.error('Buffer metodu da uğursuz oldu:', bufferError.message);
+            throw new Error('Video göndərilə bilmədi');
           }
-        } else {
-          throw new Error('No video URL or buffer found');
         }
         
       } catch (error) {
-        console.error('Error in Facebook download:', error);
-        await extra.reply(`❌ Failed to download Facebook video.\n\nError: ${error.message}\n\nPlease try again with a different link.`);
+        console.error('Facebook yükləmə xətası:', error);
+        await extra.reply(`❌ Facebook videosu yüklənə bilmədi.\n\nXəta: ${error.message || 'Bilinməyən xəta'}\n\nZəhmət olmasa başqa bir link ilə yenidən yoxlayın.`);
       }
     } catch (error) {
-      console.error('Error in Facebook command:', error);
-      await extra.reply('An error occurred while processing the request. Please try again later.');
+      console.error('Facebook əmrində xəta:', error);
+      await extra.reply('Sorğu işlənərkən xəta baş verdi. Zəhmət olmasa bir az sonra yenidən yoxlayın.');
     }
   }
 };
-
