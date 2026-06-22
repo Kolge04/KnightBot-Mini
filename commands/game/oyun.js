@@ -13,7 +13,6 @@ async function connectDB() {
         usersCollection = db.collection('users');
         await usersCollection.createIndex({ userId: 1 }, { unique: true });
         await usersCollection.createIndex({ xal: -1 });
-        await usersCollection.createIndex({ mesajSayi: -1 });
         console.log('✅ Oyun Modulu: MongoDB-yə qoşuldu!');
     } catch (err) {
         console.error('❌ Oyun Modulu: MongoDB xətası:', err);
@@ -37,17 +36,17 @@ function oyunuMexanikiDayandir(chatId) {
     }
 }
 
-async function etibarliMesajGonder(client, chatId, text, mentions = [], message = null) {
+async function etibarliMesajGonder(sock, chatId, text, mentions = [], msg = null) {
     try {
-        if (client && typeof client.sendMessage === 'function') {
-            await client.sendMessage(chatId, { text, mentions }, { quoted: message });
+        if (sock && typeof sock.sendMessage === 'function') {
+            await sock.sendMessage(chatId, { text, mentions }, { quoted: msg });
         }
     } catch (e) {
         console.error('❌ Mesaj göndərmə xətası:', e.message);
     }
 }
 
-async function novbetiSozeKec(client, chatId) {
+async function novbetiSozeKec(sock, chatId) {
     const sessiya = oyunlar[chatId];
     if (!sessiya || !sessiya.aktiv) return;
 
@@ -61,7 +60,7 @@ async function novbetiSozeKec(client, chatId) {
     }
 
     if (sessiya.cavabsizSozSayi >= 2) {
-        await etibarliMesajGonder(client, chatId, `💤 *Oyun Dayandırıldı!* Arxa-arxaya 2 sözə heç bir aktiv oyunçu cavab vermədiyi üçün oyun avtomatik bitdi.`);
+        await etibarliMesajGonder(sock, chatId, `💤 *Oyun Dayandırıldı!* Arxa-arxaya 2 sözə heç bir aktiv oyunçu cavab vermədiyi üçün oyun avtomatik bitdi.`);
         oyunuMexanikiDayandir(chatId);
         return;
     }
@@ -69,61 +68,52 @@ async function novbetiSozeKec(client, chatId) {
     sessiya.sozIndex += 1;
 
     if (sessiya.sozIndex >= sessiya.sozler.length) {
-        await etibarliMesajGonder(client, chatId, `🏁 *Oyun başa çatdı!* Bütün sözlər bitdi. İştirak edən hər kəsə təşəkkürlər!`);
+        await etibarliMesajGonder(sock, chatId, `🏁 *Oyun başa çatdı!* Bütün sözlər bitdi. İştirak edən hər kəsə təşəkkürlər!`);
         oyunuMexanikiDayandir(chatId);
         return;
     }
 
     const yeniSoz = sessiya.sozler[sessiya.sozIndex];
-    await etibarliMesajGonder(client, chatId, `⏰ *Vaxt tamam oldu! Növbəti sözə keçirik:* \n\n💡 İpucu: _${yeniSoz.ipucu}_\n🔍 Söz: *${yeniSoz.şablon}*`);
+    await etibarliMesajGonder(sock, chatId, `⏰ *Vaxt tamam oldu! Növbəti sözə keçirik:* \n\n💡 İpucu: _${yeniSoz.ipucu}_\n🔍 Söz: *${yeniSoz.şablon}*`);
 
     sessiya.sozTaymeri = setTimeout(() => {
-        novbetiSozeKec(client, chatId);
+        novbetiSozeKec(sock, chatId);
     }, 7000);
 }
 
 module.exports = {
     name: 'game',
-    aliases: ['gm', 'oyun'],
+    aliases: ['gm', 'oyun', 'join', 'unjoin', 'stop', 'top', 'xal', 'ipucu', 'user'],
     category: 'game',
-    description: 'Qarışıq söz oyununu idarə edir',
-    usage: '.game, .oyun, .join, .stop, .top, .xal',
+    description: 'Framework-ə tam uyğunlaşdırılmış söz oyunu',
+    usage: '.oyun, .join, .stop, .top, .xal, .ipucu',
 
-    async execute(client, message) {
+    async execute(sock, msg, args, options) {
         try {
-            if (!message) return;
+            if (!msg) return;
             
-            // Framework-ü sığortalayırıq
-            if (!message.from) message.from = message.key?.remoteJid;
-            const chatId = message.from || message.key?.remoteJid;
-            if (!chatId) return;
+            const chatId = options?.from || msg.key?.remoteJid;
+            const senderId = options?.sender || msg.key?.participant || msg.key?.remoteJid;
+            if (!chatId || !senderId) return;
 
-            const senderId = message.key.participant || message.key.remoteJid;
-            const isGroup = true; 
-            const cleanSender = senderId ? senderId.split('@')[0].split(':')[0] : 'Oyunçu';
+            const cleanSender = senderId.split('@')[0].split(':')[0];
 
-            // Mesajın mətnini tam zəmanətli şəkildə alırıq
+            // Hansı əmrin yazıldığını bəlli edirik
             let textContent = '';
-            if (message.body) {
-                textContent = message.body;
-            } else if (message.message) {
-                textContent = message.message.conversation || message.message.extendedTextMessage?.text || '';
-            }
+            if (msg.body) textContent = msg.body;
+            else if (msg.message) textContent = msg.message.conversation || msg.message.extendedTextMessage?.text || '';
             textContent = textContent.trim();
 
-            // Əmri təyin edirik (Məsələn: .oyun yazılıbsa -> oyun)
             let activeCmd = '';
-            const prefixler = ['.', '/', '!'];
-            if (prefixler.includes(textContent[0])) {
-                activeCmd = textContent.slice(1).trim().split(/\s+/)[0].toLowerCase();
+            if (textContent.startsWith(config.prefix)) {
+                activeCmd = textContent.slice(config.prefix.length).trim().split(/\s+/)[0].toLowerCase();
             }
 
             if (!usersCollection) return;
 
-            // --- MENYU ---
+            // --- 1. MENYU ---
             if (activeCmd === 'game' || activeCmd === 'gm') {
                 const menuTxt = `🎮 *SÖZ OYUNU BOT MENYUSU:* 🎮\n\n` +
-                `*👥 Qrup Daxili Komandalar:* \n` +
                 `🎮 ➔ .oyun (Söz oyununu başladır)\n` +
                 `➕ ➔ .join (Oyuna rəsmi qoşulur)\n` +
                 `🚪 ➔ .unjoin (Oyundan ayrılır)\n` +
@@ -131,16 +121,17 @@ module.exports = {
                 `💡 ➔ .ipucu (Gizli söz üçün ipucu -5 Xal)\n` +
                 `📊 ➔ .xal (Sizin cari xalınız)\n` +
                 `🏆 ➔ .top (Liderlər reytinq cədvəli)\n` +
-                `🛑 ➔ .stop (Aktiv oyunu dayandırır)\n`;
+                `🛑 ➔ .stop (Aktiv oyunu dayandırır)\n\n` +
+                `📝 *Qeyd:* Cavabları yazarkən əvvəlinə nöqtə qoymayın! Sadəcə cavabın özünü yazın (Məs: Kitab).`;
                 
-                await etibarliMesajGonder(client, chatId, menuTxt, [], message);
+                await etibarliMesajGonder(sock, chatId, menuTxt, [], msg);
                 return;
             }
 
-            // --- OYUNU BAŞLATMAQ ---
+            // --- 2. OYUNU BAŞLATMAQ ---
             if (activeCmd === 'oyun') {
                 if (oyunlar[chatId]) {
-                    await etibarliMesajGonder(client, chatId, '⚠️ Bu qrupda oyun onsuz da aktivdir!', [], message);
+                    await etibarliMesajGonder(sock, chatId, '⚠️ Bu qrupda oyun onsuz da aktivdir!', [], msg);
                     return;
                 }
 
@@ -158,117 +149,117 @@ module.exports = {
                 const sessiya = oyunlar[chatId];
                 const cariSoz = sessiya.sozler[sessiya.sozIndex];
 
-                const startMesaji = `🎮 *SÖZ OYUNU BAŞLADI!* 🎮\n\n👤 Oyunu başladan və ilk qoşulan: @${cleanSender}\n📢 Digər iştirakçılar qoşulmaq üçün .join yazmalıdır!\n\n⏱️ *HƏR SÖZ ÜÇÜN CƏMİ 7 SANİYƏNİZ VAR!*\n\n💡 İpucu: _${cariSoz.ipucu}_\n🔍 Söz: *${cariSoz.şablon}*`;
+                const startMesaji = `🎮 *SÖZ OYUNU BAŞLADI!* 🎮\n\n👤 Oyunu başladan və ilk qoşulan: @${cleanSender}\n📢 Digər iştirakçılar qoşulmaq üçün *.join* yazmalıdır!\n\n⏱️ *HƏR SÖZ ÜÇÜN CƏMİ 7 SANİYƏNİZ VAR!*\n\n💡 İpucu: _${cariSoz.ipucu}_\n🔍 Söz: *${cariSoz.şablon}*`;
 
-                await etibarliMesajGonder(client, chatId, startMesaji, [senderId], message);
+                await etibarliMesajGonder(sock, chatId, startMesaji, [senderId], msg);
                 
                 sessiya.sozTaymeri = setTimeout(() => {
-                    novbetiSozeKec(client, chatId);
+                    novbetiSozeKec(sock, chatId);
                 }, 7000);
                 return;
             }
 
-            // --- OYUNA QOŞULMAQ ---
+            // --- 3. OYUNA QOŞULMAQ ---
             if (activeCmd === 'join') {
                 const sessiya = oyunlar[chatId];
                 if (!sessiya || !sessiya.aktiv) {
-                    await etibarliMesajGonder(client, chatId, '❌ Hazırda aktiv oyun yoxdur. Əvvəlcə `.oyun` yazaraq başladın.', [], message);
+                    await etibarliMesajGonder(sock, chatId, '❌ Hazırda aktiv oyun yoxdur. Əvvəlcə `.oyun` yazaraq başladın.', [], msg);
                     return;
                 }
                 if (sessiya.oyuncular.has(senderId)) {
-                    await etibarliMesajGonder(client, chatId, 'ℹ️ Siz onsuz da oyuna qoşulmusunuz!', [], message);
+                    await etibarliMesajGonder(sock, chatId, 'ℹ️ Siz onsuz da oyuna qoşulmusunuz!', [], msg);
                     return;
                 }
 
                 sessiya.oyuncular.add(senderId);
-                await etibarliMesajGonder(client, chatId, `✅ @${cleanSender} oyuna uğurla qoşuldu!`, [senderId], message);
+                await etibarliMesajGonder(sock, chatId, `✅ @${cleanSender} oyuna uğurla qoşuldu!`, [senderId], msg);
                 return;
             }
 
-            // --- OYUNDAN AYRILMAQ ---
+            // --- 4. OYUNDAN AYRILMAQ ---
             if (activeCmd === 'unjoin') {
                 const sessiya = oyunlar[chatId];
                 if (!sessiya || !sessiya.aktiv) {
-                    await etibarliMesajGonder(client, chatId, '❌ Hazırda aktiv bir oyun yoxdur.', [], message);
+                    await etibarliMesajGonder(sock, chatId, '❌ Hazırda aktiv bir oyun yoxdur.', [], msg);
                     return;
                 }
                 if (!sessiya.oyuncular.has(senderId)) {
-                    await etibarliMesajGonder(client, chatId, 'ℹ️ Siz onsuz da bu oyunda deyilsiniz.', [], message);
+                    await etibarliMesajGonder(sock, chatId, 'ℹ️ Siz onsuz da bu oyunda deyilsiniz.', [], msg);
                     return;
                 }
 
                 sessiya.oyuncular.delete(senderId);
                 if (sessiya.oyuncular.size === 0) {
                     oyunuMexanikiDayandir(chatId);
-                    await etibarliMesajGonder(client, chatId, `🚪 Aktiv oyunçu qalmadığı üçün oyun dayandırıldı.`);
+                    await etibarliMesajGonder(sock, chatId, `🚪 Aktiv oyunçu qalmadığı üçün oyun dayandırıldı.`);
                     return;
                 }
-                await etibarliMesajGonder(client, chatId, `🚪 @${cleanSender} oyundan ayrıldı.`, [senderId], message);
+                await etibarliMesajGonder(sock, chatId, `🚪 @${cleanSender} oyundan ayrıldı.`, [senderId], msg);
                 return;
             }
 
-            // --- İSTİFADƏÇİLƏR ---
+            // --- 5. AKTİV İSTİFADƏÇİLƏR ---
             if (activeCmd === 'user') {
                 if (!oyunlar[chatId]) {
-                    await etibarliMesajGonder(client, chatId, '❌ Hazırda aktiv oyun yoxdur.', [], message);
+                    await etibarliMesajGonder(sock, chatId, '❌ Hazırda aktiv oyun yoxdur.', [], msg);
                     return;
                 }
                 const list = Array.from(oyunlar[chatId].oyuncular);
                 let tekst = `👥 *Aktiv Oyunçular (${list.length} nəfər):*\n\n`;
                 list.forEach((id, idx) => { tekst += `${idx + 1}. @${id.split('@')[0]}\n`; });
-                await etibarliMesajGonder(client, chatId, tekst, list, message);
+                await etibarliMesajGonder(sock, chatId, tekst, list, msg);
                 return;
             }
 
-            // --- DAYANDIRMAQ ---
+            // --- 6. DAYANDIRMAQ ---
             if (activeCmd === 'stop') {
                 if (oyunlar[chatId]) {
                     oyunuMexanikiDayandir(chatId);
-                    await etibarliMesajGonder(client, chatId, '🛑 Oyun dayandırıldı və taymerlər sıfırlandı.', [], message);
+                    await etibarliMesajGonder(sock, chatId, '🛑 Oyun dayandırıldı və taymerlər sıfırlandı.', [], msg);
                 } else {
-                    await etibarliMesajGonder(client, chatId, 'Hazırda dayandırılacaq aktiv oyun yoxdur.', [], message);
+                    await etibarliMesajGonder(sock, chatId, 'Hazırda dayandırılacaq aktiv oyun yoxdur.', [], msg);
                 }
                 return;
             }
 
-            // --- XAL VƏ REYTİNQ ---
+            // --- 7. XAL VƏ REYTİNQ ---
             if (activeCmd === 'xal') {
                 let userDoc = await usersCollection.findOne({ userId: senderId });
-                await etibarliMesajGonder(client, chatId, `📊 Sizin cari xalınız: *${userDoc ? userDoc.xal : 0}*`, [], message);
+                await etibarliMesajGonder(sock, chatId, `📊 Sizin cari xalınız: *${userDoc ? userDoc.xal : 0}*`, [], msg);
                 return;
             }
 
             if (activeCmd === 'top') {
                 const topUsers = await usersCollection.find().sort({ xal: -1 }).limit(15).toArray();
                 if (topUsers.length === 0) {
-                    await etibarliMesajGonder(client, chatId, '📉 Siyahı boşdur.', [], message);
+                    await etibarliMesajGonder(sock, chatId, '📉 Siyahı boşdur.', [], msg);
                     return;
                 }
                 let reytinq = `🏆 *TOP 15 LİDERLƏR REYTİNQİ* 🏆\n\n`;
                 topUsers.forEach((u, i) => { reytinq += `${i + 1}. @${u.userId.split('@')[0]} ➔ *${u.xal} xal*\n`; });
-                await etibarliMesajGonder(client, chatId, reytinq, topUsers.map(u => u.userId), message);
+                await etibarliMesajGonder(sock, chatId, reytinq, topUsers.map(u => u.userId), msg);
                 return;
             }
 
-            // --- İPUCU ---
+            // --- 8. İPUCU ---
             if (activeCmd === 'ipucu') {
                 const sessiya = oyunlar[chatId];
                 if (!sessiya) return;
                 if (!sessiya.oyuncular.has(senderId)) {
-                    await etibarliMesajGonder(client, chatId, '⚠️ Əvvəlcə oyuna qoşulmalısınız! (`.join`)', [], message);
+                    await etibarliMesajGonder(sock, chatId, '⚠️ Əvvəlcə oyuna qoşulmalısınız! (`.join`)', [], msg);
                     return;
                 }
 
                 if (!sessiya.ipucuLimitleri[senderId]) sessiya.ipucuLimitleri[senderId] = 0;
                 if (sessiya.ipucuLimitleri[senderId] >= 4) {
-                    await etibarliMesajGonder(client, chatId, '⚠️ İpucu limitiniz bitib (Maksimum 4).', [], message);
+                    await etibarliMesajGonder(sock, chatId, '⚠️ İpucu limitiniz bitib (Maksimum 4).', [], msg);
                     return;
                 }
 
                 let userDoc = await usersCollection.findOne({ userId: senderId });
                 let currentXal = userDoc ? userDoc.xal : 0;
                 if (currentXal < 5) {
-                    await etibarliMesajGonder(client, chatId, `❌ Balansda kifayət qədər xal yoxdur (Xalınız: ${currentXal}).`, [], message);
+                    await etibarliMesajGonder(sock, chatId, `❌ Balansda kifayət qədər xal yoxdur (Xalınız: ${currentXal}).`, [], msg);
                     return;
                 }
 
@@ -276,17 +267,18 @@ module.exports = {
                 sessiya.ipucuLimitleri[senderId] += 1;
 
                 const cariSoz = sessiya.sozler[sessiya.sozIndex];
-                await etibarliMesajGonder(client, chatId, `💡 *İPUCU VERİLDİ* \n👤 @${cleanSender} (-5 Xal)\n📌 İpucu: _${cariSoz.ipucu}_\n🔍 Söz: *${cariSoz.şablon}*`, [senderId], message);
+                await etibarliMesajGonder(sock, chatId, `💡 *İPUCU VERİLDİ* \n👤 @${cleanSender} (-5 Xal)\n📌 İpucu: _${cariSoz.ipucu}_\n🔍 Söz: *${cariSoz.şablon}*`, [senderId], msg);
                 return;
             }
 
-            // --- CAVAB MEXANİZMİ (Hər hansı bir əmr yazılmayıbsa düzgün cavabı yoxlayır)
+            // --- 9. CAVAB MEXANİZMİ (Nöqtəsiz gələn mesajları qəbul etmək üçün) ---
+            // Əgər activeCmd boşdursa, deməli bu sadəcə nöqtəsiz yazılmış bir mətndir və cavab ola bilər.
             if (oyunlar[chatId] && oyunlar[chatId].aktiv && !activeCmd) {
                 const sessiya = oyunlar[chatId];
                 if (!sessiya.oyuncular.has(senderId)) return;
                 
                 const clearedText = textContent.toLowerCase();
-                if (clearedText.includes(" ")) return;
+                if (clearedText.includes(" ")) return; // Boşluq varsa söz deyil
 
                 const cariSoz = sessiya.sozler[sessiya.sozIndex];
 
@@ -297,8 +289,8 @@ module.exports = {
                     await usersCollection.updateOne({ userId: senderId }, { $inc: { xal: 10 } }, { upsert: true });
                     let updatedDoc = await usersCollection.findOne({ userId: senderId });
 
-                    await etibarliMesajGonder(client, chatId, `✅ *Doğru Cavab! @${cleanSender} (+10 Xal)*\n📊 Ümumi Balansınız: *${updatedDoc.xal} xal*`, [senderId], message);
-                    novbetiSozeKec(client, chatId);
+                    await etibarliMesajGonder(sock, chatId, `✅ *Doğru Cavab! @${cleanSender} (+10 Xal)*\n📊 Ümumi Balansınız: *${updatedDoc.xal} xal*`, [senderId], msg);
+                    novbetiSozeKec(sock, chatId);
                 } else {
                     let userDoc = await usersCollection.findOne({ userId: senderId });
                     let currentXal = userDoc ? userDoc.xal : 0;
