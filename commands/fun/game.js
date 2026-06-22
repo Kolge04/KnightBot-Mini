@@ -86,7 +86,7 @@ module.exports = {
     aliases: ['gm', 'oyun', 'join', 'unjoin', 'stop', 'top', 'xal', 'ipucu', 'user', 'clear', 'reset', 'game_internal_answer'],
     category: 'game',
     description: 'Nöqtəli və Nöqtəsiz cavab dəstəkli, sıfırlama sistemli söz oyunu',
-    usage: '.oyun, .join, .stop, .top, .xal, .ipucu, .clear, .reset',
+    usage: 'gm', 'oyun', 'join', 'unjoin', 'stop', 'top', 'xal', 'ipucu', 'user',
     oyunlar, // handler.js-in oxuya bilməsi üçün çölə çıxarırıq
 
     async execute(sock, msg, args, options) {
@@ -121,52 +121,51 @@ module.exports = {
 
             if (!usersCollection) return;
 
-            // ==========================================
-            // 🛠️ YENİ ƏMRLƏR: CLEAR VƏ RESET
-            // ==========================================
-            
-            // --- CLEAR: Bütün bazadakı istifadəçilərin xallarını 0 edir ---
-            if (activeCmd === 'clear') {
-                await usersCollection.updateMany({}, { $set: { xal: 0 } });
-                await etibarliMesajGonder(sock, chatId, '♻️ Verilənlər bazasındakı bütün istifadəçilərin xalları sıfırlandı!', [], msg);
-                return;
-            }
+            // --- CLEAR: Bütün bazadakı istifadəçiləri TAMAMİLƏ silir ---
+if (activeCmd === 'clear') {
+    // updateMany əvəzinə deleteMany istifadə edərək bütün sənədləri bazadan təmizləyirik
+    await usersCollection.deleteMany({}); 
+    await etibarliMesajGonder(sock, chatId, '♻️ Verilənlər bazasındakı bütün istifadəçilər və xallar tamamilə silindi!', [], msg);
+    return;
+}
 
-            // --- RESET: Reply, @etiket və ya nömrə ilə xal sıfırlayır ---
-            if (activeCmd === 'reset') {
-                let targetUser = null;
+// --- RESET: Reply, @etiket və ya nömrə ilə istifadəçini bazadan silir ---
+if (activeCmd === 'reset') {
+    let targetUser = null;
 
-                // 1. Üsul: Mesaj cavablanıbsa (Reply)
-                const quotedParticipant = msg.message?.extendedTextMessage?.contextInfo?.participant;
-                if (quotedParticipant) {
-                    targetUser = quotedParticipant;
-                }
+    // 1. Üsul: Mesaj cavablanıbsa (Reply)
+    const quotedParticipant = msg.message?.extendedTextMessage?.contextInfo?.participant;
+    if (quotedParticipant) {
+        targetUser = quotedParticipant;
+    }
 
-                // 2. Üsul: @etiket edilibsə (Mention)
-                if (!targetUser) {
-                    const mentions = msg.message?.extendedTextMessage?.contextInfo?.mentionedJid;
-                    if (mentions && mentions.length > 0) {
-                        targetUser = mentions[0];
-                    }
-                }
+    // 2. Üsul: @etiket edilibsə (Mention)
+    if (!targetUser) {
+        const mentions = msg.message?.extendedTextMessage?.contextInfo?.mentionedJid;
+        if (mentions && mentions.length > 0) {
+            targetUser = mentions[0];
+        }
+    }
 
-                // 3. Üsul: Birbaşa nömrə yazılıbsa (.reset 99450xxxxxxx)
-                if (!targetUser) {
-                    const temizNomre = textContent.split(' ')[1]?.replace(/[^0-9]/g, '');
-                    if (temizNomre) {
-                        targetUser = `${temizNomre}@s.whatsapp.net`;
-                    }
-                }
+    // Əgər silinəcək istifadəçi tapıldısa
+    if (targetUser) {
+        // İstifadəçinin bazadakı unikal ID-sinə görə (böyük ehtimalla 'id', 'jid' və ya 'userId' sahəsidir, öz bazana uyğunlaşdır, mən 'id' və ya 'jid' ehtimalını nəzərə alıram)
+        // updateOne əvəzinə deleteOne istifadə edirik
+        await usersCollection.deleteOne({ 
+            $or: [
+                { id: targetUser },
+                { jid: targetUser },
+                { userId: targetUser }
+            ] 
+        });
 
-                if (targetUser) {
-                    await usersCollection.updateOne({ userId: targetUser }, { $set: { xal: 0 } }, { upsert: true });
-                    const t_clean = targetUser.split('@')[0];
-                    await etibarliMesajGonder(sock, chatId, `🧹 @${t_clean} istifadəçisinin xalı sıfırlandı.`, [targetUser], msg);
-                } else {
-                    await etibarliMesajGonder(sock, chatId, '⚠️ *İstifadə qaydası:*\n1. Mesajı cavablayaraq `.reset` yazın.\n2. `.reset @istifadeci` şəklində etiketləyin.\n3. `.reset 99477xxxxxxx` nömrə ilə yazın.', [], msg);
-                }
-                return;
-            }
+        const cleanNumber = targetUser.split('@')[0];
+        await etibarliMesajGonder(sock, chatId, `🧹 @${cleanNumber} istifadəçisi və xalları bazadan tamamilə silindi.`, [targetUser], msg);
+    } else {
+        await etibarliMesajGonder(sock, chatId, '⚠️ Zəhmət olmasa sıfırlamaq istədiyiniz şəxsin mesajına cavab yazın (reply) və ya onu @etiket edin.', [], msg);
+    }
+    return;
+}
 
             // ==========================================
             // 🎮 OYUN MEXANİZMİ VƏ IDARƏETMƏ
