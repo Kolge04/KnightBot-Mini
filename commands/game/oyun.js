@@ -94,21 +94,13 @@ module.exports = {
         const senderId = message.key.participant || message.key.remoteJid;
         
         // 🌟 @lid QRUPLARINI DƏSTƏKLƏMƏK ÜÇÜN BU SƏTİR DƏYİŞDİRİLDİ:
-        const isGroup = typeof chatId === 'string' && (chatId.endsWith('@g.us') || chatId.endsWith('@lid'));
+        const isGroup = true;
         
         const cleanSender = senderId ? senderId.split('@')[0].split(':')[0] : 'Oyunçu';
 
         if (!usersCollection) return;
 
-        // Qrup daxili mesaj sayğacı (Oyun əmri deyilsə)
-        if (isGroup && !['game', 'gm', 'oyun', 'join', 'unjoin', 'user', 'stop', 'xal', 'top', 'clear', 'ipucu'].includes(cmd) && !cmd) {
-            await usersCollection.updateOne(
-                { userId: senderId },
-                { $inc: { mesajSayi: 1 } },
-                { upsert: true }
-            );
-        }
-
+        
         // --- MENYU / MEZMUN ---
         if (cmd === 'game' || cmd === 'gm') {
             await client.sendMessage(chatId, { 
