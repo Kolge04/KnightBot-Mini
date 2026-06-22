@@ -31,7 +31,7 @@ module.exports = {
       
       if (!text) {
         return await sock.sendMessage(chatId, { 
-          text: 'Usage: .song <song name or YouTube link>' 
+          text: 'İstifadə: .mahnı <mahnı adı və ya YouTube linki>' 
         }, { quoted: msg });
       }
       
