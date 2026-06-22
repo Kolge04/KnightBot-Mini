@@ -59,8 +59,8 @@ async function novbetiSozeKec(sock, chatId) {
         sessiya.dogruCavabTapildi = false;
     }
 
-    if (sessiya.cavabsizSozSayi >= 2) {
-        await etibarliMesajGonder(sock, chatId, `💤 *Oyun Dayandırıldı!* Arxa-arxaya 2 sözə heç bir aktiv oyunçu cavab vermədiyi üçün oyun avtomatik bitdi.`);
+    if (sessiya.cavabsizSozSayi >= 4) {
+        await etibarliMesajGonder(sock, chatId, `💤 *Oyun Dayandırıldı!* Arxa-arxaya 4 sözə heç bir aktiv oyunçu cavab vermədiyi üçün oyun avtomatik bitdi.`);
         oyunuMexanikiDayandir(chatId);
         return;
     }
@@ -78,7 +78,7 @@ async function novbetiSozeKec(sock, chatId) {
 
     sessiya.sozTaymeri = setTimeout(() => {
         novbetiSozeKec(sock, chatId);
-    }, 7000);
+    }, 10000);
 }
 
 module.exports = {
@@ -173,7 +173,7 @@ if (activeCmd === 'reset') {
 
             // --- MENYU ---
             if (activeCmd === 'game' || activeCmd === 'gm') {
-                const menuTxt = `🎮 *SÖZ OYUNU BOT MENYUSU:* 🎮\n\n` +
+                const menuTxt = `🎮 *SÖZ OYUNU  MENYUSU:* 🎮\n\n` +
                 `🎮 ➔ .oyun (Söz oyununu başladır)\n` +
                 `➕ ➔ .join (Oyuna rəsmi qoşulur)\n` +
                 `🚪 ➔ .unjoin (Oyundan ayrılır)\n` +
@@ -209,7 +209,7 @@ if (activeCmd === 'reset') {
                 const sessiya = oyunlar[chatId];
                 const cariSoz = sessiya.sozler[sessiya.sozIndex];
 
-                const startMesaji = `🎮 *SÖZ OYUNU BAŞLADI!* 🎮\n\n👤 Oyunu başladan və ilk qoşulan: @${cleanSender}\n📢 Digər iştirakçılar qoşulmaq üçün *.join* yazmalıdır!\n\n⏱️ *HƏR SÖZ ÜÇÜN CƏMİ 7 SANİYƏNİZ VAR!*\n\n💡 İpucu: _${cariSoz.ipucu}_\n🔍 Söz: *${cariSoz.şablon}*`;
+                const startMesaji = `🎮 *SÖZ OYUNU BAŞLADI!* 🎮\n\n👤 Oyunu başladan və ilk qoşulan: @${cleanSender}\n📢 Digər iştirakçılar qoşulmaq üçün *.join* yazmalıdır!\n\n⏱️ *HƏR SÖZ ÜÇÜN CƏMİ 10 SANİYƏNİZ VAR!*\n\n💡 İpucu: _${cariSoz.ipucu}_\n🔍 Söz: *${cariSoz.şablon}*`;
 
                 await etibarliMesajGonder(sock, chatId, startMesaji, [senderId], msg);
                 
@@ -319,7 +319,7 @@ if (activeCmd === 'reset') {
                 let userDoc = await usersCollection.findOne({ userId: senderId });
                 let currentXal = userDoc ? userDoc.xal : 0;
                 if (currentXal < 5) {
-                    await etibarliMesajGonder(sock, chatId, `❌ Balansda kifayət qədər xal yoxdur (Xalınız: ${currentXal}).`, [], msg);
+                    await etibarliMesajGonder(sock, chatId, `❌ Kifayət qədər xal yoxdur (Xalınız: ${currentXal}).`, [], msg);
                     return;
                 }
 
@@ -356,7 +356,7 @@ if (activeCmd === 'reset') {
                     await usersCollection.updateOne({ userId: senderId }, { $inc: { xal: 10 } }, { upsert: true });
                     let updatedDoc = await usersCollection.findOne({ userId: senderId });
 
-                    await etibarliMesajGonder(sock, chatId, `✅ *Doğru Cavab! @${cleanSender} (+10 Xal)*\n📊 Ümumi Balansınız: *${updatedDoc.xal} xal*`, [senderId], msg);
+                    await etibarliMesajGonder(sock, chatId, `✅ *Doğru Cavab! @${cleanSender} (+10 Xal)*\n📊 Ümumi Xalınız: *${updatedDoc.xal} xal*`, [senderId], msg);
                     novbetiSozeKec(sock, chatId);
                 } else {
                     // Səhv cavab yazılıbsa və bu hər hansı başqa bir əmr `.oyun`, `.stop` deyil saniyədə -5 xal çıxılır
