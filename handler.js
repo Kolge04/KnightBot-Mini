@@ -765,21 +765,20 @@ const handleMessage = async (sock, msg) => {
 
     
     
-    // === OYUN ÜÇÜN ÖZƏL KEÇİD ===
+    // ==========================================
+    // 🎮 OYUN ÜÇÜN ÖZƏL KEÇİD (NÖQTƏSİZ CAVAB)
+    // ==========================================
     let isGameAnswer = false;
     let commandName = '';
     let args = [];
 
-    // Əgər qrupda aktiv oyun varsa və yazılan mesaj nöqtə ilə başlamırsa
     if (isGroup && !body.startsWith(config.prefix)) {
         try {
-            // oyun Modulunu müvəqqəti çağırıb yoxlayırıq
             const oyunModulu = require('./commands/game/oyun');
             if (oyunModulu.oyunlar && oyunModulu.oyunlar[from] && oyunModulu.oyunlar[from].aktiv) {
-                // Əgər istifadəçi oyuna rəsmi qoşulubsa, mesajı birbaşa oyun əmrinə yönləndir
                 if (oyunModulu.oyunlar[from].oyuncular.has(sender)) {
                     isGameAnswer = true;
-                    commandName = 'game_internal_answer'; // Xüsusi daxili ad veririk
+                    commandName = 'game_internal_answer';
                     args = body.split(/\s+/);
                 }
             }
@@ -794,7 +793,6 @@ const handleMessage = async (sock, msg) => {
         args = body.slice(config.prefix.length).trim().split(/\s+/);
         commandName = args.shift().toLowerCase();
     }
-
 
 
 
