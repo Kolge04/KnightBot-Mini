@@ -99,22 +99,25 @@ module.exports = {
 
             const cleanSender = senderId.split('@')[0].split(':')[0];
 
+            // Baileys mesaj məzmununu düzgün oxuyuruq (msg.body mövcud deyil)
             let textContent = '';
-            if (msg.body) textContent = msg.body;
-            else if (msg.message) textContent = msg.message.conversation || msg.message.extendedTextMessage?.text || '';
+            if (msg.message) {
+                let m = msg.message;
+                if (m.ephemeralMessage) m = m.ephemeralMessage.message;
+                if (m.viewOnceMessageV2) m = m.viewOnceMessageV2.message;
+                if (m.viewOnceMessage) m = m.viewOnceMessage.message;
+                textContent = m.conversation || m.extendedTextMessage?.text || m.imageMessage?.caption || m.videoMessage?.caption || '';
+            }
             textContent = textContent.trim();
 
-            // Əmri təyin edirik (Bu daxili nöqtəsiz cavabdır yoxsa normal əmr)
+            // Əmri təyin edirik
             let activeCmd = '';
             if (textContent.startsWith(config.prefix)) {
                 activeCmd = textContent.slice(config.prefix.length).trim().split(/\s+/)[0].toLowerCase();
-            } else if (options && options.reply) {
-                // Əgər handler.js bunu xüsusi daxili adla yönləndiribsə
-                if (msg.body === undefined && textContent) activeCmd = 'game_internal_answer';
+            } else if (textContent) {
+                // Prefix yoxdursa bu oyun cavabıdır
+                activeCmd = 'game_internal_answer';
             }
-            
-            // Framework-ün bəzi versiyalarında daxili ad birbaşa commandName kimi gələ bilər
-            if (args && args._commandName === 'game_internal_answer') activeCmd = 'game_internal_answer';
 
             if (!usersCollection) return;
 
@@ -336,11 +339,18 @@ module.exports = {
                 const sessiya = oyunlar[chatId];
                 if (!sessiya.oyuncular.has(senderId)) return;
                 
-                const clearedText = textContent.trim().toLowerCase();
+                // Azərbaycan türkcəsi üçün düzgün müqayisə (İ/i problemi)
+                const normalizeAz = (str) => str.trim()
+                    .replace(/İ/g, 'i').replace(/I/g, 'i')
+                    .replace(/Ğ/g, 'ğ').replace(/Ü/g, 'ü')
+                    .replace(/Ş/g, 'ş').replace(/Ö/g, 'ö')
+                    .replace(/Ç/g, 'ç').replace(/Ə/g, 'ə')
+                    .toLowerCase();
+                const clearedText = normalizeAz(textContent);
                 const cariSoz = sessiya.sozler[sessiya.sozIndex];
 
                 // Əgər gələn mesaj tam olaraq düzgün cavaba bərabərdirsə
-                if (clearedText === cariSoz.cavab.toLowerCase()) {
+                if (clearedText === normalizeAz(cariSoz.cavab)) {
                     if (sessiya.sozTaymeri) clearTimeout(sessiya.sozTaymeri);
                     sessiya.dogruCavabTapildi = true;
 
