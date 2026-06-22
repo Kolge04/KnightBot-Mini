@@ -754,7 +754,35 @@ const handleMessage = async (sock, msg) => {
     } catch (e) {
       // Silently ignore if tictactoe command doesn't exist or has errors
     }
-    
+
+    // Check for active söz oyunu (word game) answers (before prefix check)
+    try {
+      const gameModule = require('./commands/fun/game');
+      if (gameModule.oyunlar && gameModule.oyunlar[from] && gameModule.oyunlar[from].aktiv) {
+        const sessiya = gameModule.oyunlar[from];
+        if (sessiya.oyuncular.has(sender) && body && !body.startsWith(config.prefix)) {
+          const gameCommand = commands.get('game');
+          if (gameCommand && gameCommand.execute) {
+            await gameCommand.execute(sock, msg, [], {
+              from,
+              sender,
+              isGroup,
+              groupMetadata,
+              isOwner: isOwner(sender),
+              isAdmin: await isAdmin(sock, sender, from, groupMetadata),
+              isBotAdmin: await isBotAdmin(sock, from, groupMetadata),
+              isMod: isMod(sender),
+              reply: (text) => sock.sendMessage(from, { text }, { quoted: msg }),
+              react: (emoji) => sock.sendMessage(from, { react: { text: emoji, key: msg.key } })
+            });
+          }
+          return; // Message handled by word game, stop further processing
+        }
+      }
+    } catch (e) {
+      // Silently ignore if game command doesn't exist or has errors
+    }
+
     if (!body.startsWith(config.prefix)) return;
 
     
