@@ -1,8 +1,8 @@
 /**
- * Instagram Downloader - Using ruhend-scraper
+ * Instagram Downloader - Fixed Internal Scraper Issue
  */
 
-const { igdl } = require('ruhend-scraper');
+const axios = require('axios'); // ruhend-scraper yerinə birbaşa sorğu üçün
 const config = require('../../config');
 
 // Store processed message IDs to prevent duplicates
@@ -38,10 +38,10 @@ function isValidMediaUrl(url) {
 
 module.exports = {
   name: 'instagram',
-  aliases: ['ig', 'insta', 'igdl', 'reels'],
+  aliases: ['ig', 'insta'],
   category: 'media',
-  description: 'Download Instagram photos/videos/reels',
-  usage: '<Instagram URL>',
+  description: 'Instagram fotolarını/videolarını/makaralarını yükləyin',
+  usage: '.instagram <Instagram URL>',
   
   async execute(sock, msg, args, extra) {
     try {
@@ -65,7 +65,7 @@ module.exports = {
                    args.join(' ');
       
       if (!text) {
-        return extra.reply('Please provide an Instagram link for the video.');
+        return extra.reply('Zəhmət olmasa video üçün Instagram linkini təqdim edin.');
       }
       
       // Check for various Instagram URL formats
@@ -80,17 +80,32 @@ module.exports = {
       const isValidUrl = instagramPatterns.some(pattern => pattern.test(text));
       
       if (!isValidUrl) {
-        return extra.reply('That is not a valid Instagram link. Please provide a valid Instagram post, reel, or video link.');
+        return extra.reply('Bu etibarlı Instagram linki deyil. Zəhmət olmasa etibarlı Instagram postu, çarx və ya video linki təqdim edin.');
       }
       
       await sock.sendMessage(chatId, {
         react: { text: '📥', key: msg.key }
       });
       
-      const downloadData = await igdl(text);
+      // BLOKLANMIŞ ruhend-scraper YERİNƏ STABİL PROXY API SORĞUSU
+      let downloadData = null;
+      try {
+        const res = await axios.get(`https://api.siputzx.my.id/api/d/igdl?url=${encodeURIComponent(text)}`, { timeout: 15000 });
+        if (res.data && res.data.status && res.data.data) {
+          // Mövcud kodun oxuya bilməsi üçün eyni array strukturuna salırı rectangles
+          downloadData = {
+            data: res.data.data.map(item => ({
+              url: item.url,
+              type: item.type || (item.url.includes('mp4') ? 'video' : 'image')
+            }))
+          };
+        }
+      } catch (apiErr) {
+        console.error('Alt API xətası:', apiErr);
+      }
       
       if (!downloadData || !downloadData.data || downloadData.data.length === 0) {
-        return extra.reply('❌ No media found at the provided link. The post might be private or the link is invalid.');
+        return extra.reply('❌ Verilən linkdə heç bir media tapılmadı. Post şəxsi ola bilər və ya link etibarsızdır.');
       }
       
       const mediaData = downloadData.data;
@@ -102,7 +117,7 @@ module.exports = {
       const mediaToDownload = uniqueMedia.slice(0, 20);
       
       if (mediaToDownload.length === 0) {
-        return extra.reply('❌ No valid media found to download. This might be a private post or the scraper failed.');
+        return extra.reply('❌ Yükləmək üçün etibarlı media tapılmadı. Bu şəxsi yazı ola bilər və ya kazıyıcı uğursuz ola bilər.');
       }
       
       // Download all media silently without status messages
@@ -112,37 +127,37 @@ module.exports = {
           const mediaUrl = media.url;
           
           // Check if URL ends with common video extensions
-          const isVideo = /\.(mp4|mov|avi|mkv|webm)$/i.test(mediaUrl) || 
-                        media.type === 'video' || 
-                        text.includes('/reel/') || 
-                        text.includes('/tv/');
+          const isVideo = /\.(mp4|mov|avi|mkv|webm)/i.test(mediaUrl) || 
+                          mediaUrl.includes('mp4') ||
+                          media.type === 'video' || 
+                          text.includes('/reel/') || 
+                          text.includes('/tv/');
           
           if (isVideo) {
             await sock.sendMessage(chatId, {
               video: { url: mediaUrl },
               mimetype: 'video/mp4',
-              caption: `*DOWNLOADED BY ${config.botName.toUpperCase()}*`
+              caption: `*Yüklədi.. ${(config.botName || 'BOT').toUpperCase()}*`
             }, { quoted: msg });
           } else {
             await sock.sendMessage(chatId, {
               image: { url: mediaUrl },
-              caption: `*DOWNLOADED BY ${config.botName.toUpperCase()}*`
+              caption: `*Yüklədi... ${(config.botName || 'BOT').toUpperCase()}*`
             }, { quoted: msg });
           }
           
           // Add small delay between downloads to prevent rate limiting
           if (i < mediaToDownload.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 1500));
           }
           
         } catch (mediaError) {
-          console.error(`Error downloading media ${i + 1}:`, mediaError);
-          // Continue with next media if one fails
+          console.error(`Media endirərkən xəta baş verdi ${i + 1}:`, mediaError);
         }
       }
     } catch (error) {
-      console.error('Error in Instagram command:', error);
-      await extra.reply('❌ An error occurred while processing the Instagram request. Please try again.');
+      console.error('Instagram əmrində xəta:', error);
+      await extra.reply('❌ Instagram sorğusunu emal edərkən xəta baş verdi. Yenidən cəhd edin.');
     }
   }
 };
