@@ -57,6 +57,18 @@ module.exports = {
         });
         menuText += `\n`;
       }
+
+
+      // Oyun emrleri
+      if (categories.game) {
+        menuText += `┏━━━━━━━━━━━━━━━━━\n`;
+        menuText += `┃ 🎮 Oyun Əmrləri\n`;
+        menuText += `┗━━━━━━━━━━━━━━━━━\n`;
+        categories.game.forEach(cmd => {
+          menuText += `│ ➜ ${config.prefix}${cmd.name}\n`;
+        });
+        menuText += `\n`;
+      }
       
       // Group Commands
       if (categories.group) {
