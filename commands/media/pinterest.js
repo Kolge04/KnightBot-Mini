@@ -10,10 +10,10 @@ const processedMessages = new Set();
 
 module.exports = {
   name: 'pinterest',
-  aliases: ['pin', 'pindl', 'pinterestdl'],
+  aliases: ['pin', 'pnt', 'pinterestdl'],
   category: 'media',
-  description: 'Download images/videos from Pinterest',
-  usage: '.pinterest <Pinterest URL>',
+  description: 'Pinterest-dən şəkilləri/videoları yükləyin',
+  usage: '.pinterest <Pinterest Link>',
   
   async execute(sock, msg, args, extra) {
     try {
@@ -36,9 +36,9 @@ module.exports = {
       
       if (!text) {
         return await extra.reply(
-          '📌 *Pinterest Downloader*\n\n' +
-          'Download images or videos from Pinterest.\n\n' +
-          `Usage: ${config.prefix}pinterest <Pinterest URL>\n\n` +
+          '📌 *Pinterest yükləyicisi*\n\n' +
+          'Pinterest-dən şəkillər və ya videolar yükləyin.\n\n' +
+          `İstifadə: ${config.prefix}pinterest <Pinterest URL>\n\n` +
           'Example:\n' +
           `${config.prefix}pinterest https://in.pinterest.com/pin/1109363320773690068/`
         );
@@ -58,7 +58,7 @@ module.exports = {
       }
       
       if (!urlMatch) {
-        return await extra.reply('❌ Please provide a valid Pinterest pin URL!\n\nExamples:\n• https://in.pinterest.com/pin/1109363320773690068/\n• https://pin.it/dddddd\n• pin.it/dddddd');
+        return await extra.reply('❌ Lütfən, etibarlı Pinterest pin URL təmin edin!\n\nNümunə:\- .pinterest https://in.pinterest.com/pin/1109363320773690068/');
       }
       
       const pinterestUrl = urlMatch[0];
@@ -83,18 +83,18 @@ module.exports = {
         if (error.response) {
           const status = error.response.status;
           if (status === 400) {
-            return await extra.reply('❌ Bad Request: Invalid Pinterest URL. Please check the link.');
+            return await extra.reply('❌ Səhv sorğu: Yanlış Pinterest URL. Zəhmət olmasa linki yoxlayın.');
           } else if (status === 429) {
-            return await extra.reply('❌ Rate limit exceeded. Please try again later.');
+            return await extra.reply('❌ Məzənnə limiti keçildi. Lütfən, sonra yenidən cəhd edin.');
           } else if (status === 500) {
-            return await extra.reply('❌ Server error. Please try again later.');
+            return await extra.reply('❌ Server xətası. Lütfən, sonra yenidən cəhd edin.');
           }
         }
-        return await extra.reply('❌ Failed to fetch Pinterest content. Please try again.');
+        return await extra.reply('❌ Pinterest məzmununu əldə etmək alınmadı. Yenidən cəhd edin.');
       }
       
       if (!response.data || !response.data.status || !response.data.result) {
-        return await extra.reply('❌ Invalid response from API. The pin might not exist or be private.');
+        return await extra.reply('❌ API-dən yanlış cavab. Sancaq mövcud olmaya və ya şəxsi ola bilər.');
       }
       
       const pinData = response.data.result;
@@ -121,15 +121,15 @@ module.exports = {
       // Debug: log the response structure if no media URL found
       if (!imageUrl) {
         console.error('Pinterest API response structure:', JSON.stringify(pinData, null, 2));
-        return await extra.reply('❌ No media URL found in API response. The pin might be a video or have a different format.');
+        return await extra.reply('❌ API cavabında media URL-i tapılmadı. Pəncərə video ola bilər və ya fərqli formatda ola bilər.');
       }
       
       // Build caption
       let caption = `📌 *${title}*\n\n`;
       if (author && author !== 'Unknown') {
-        caption += `👤 Author: ${author}\n`;
+        caption += `👤 Müəllif: ${author}\n`;
       }
-      caption += `\n*Downloaded by ${config.botName}*`;
+      caption += `\n*Yüklədi.. ${config.botName}*`;
       
       // Send only the main media (not thumbnail separately to avoid duplicates)
       if (isVideo) {
@@ -154,10 +154,10 @@ module.exports = {
           
           // Basic validation - just check size
           if (videoBuffer.length < 100) {
-            throw new Error('Video buffer too small, likely corrupted');
+            throw new Error('Video buferi çox kiçik, ehtimal ki, zədələnib');
           }
           
-          console.log(`Video downloaded successfully: ${(videoBuffer.length / 1024 / 1024).toFixed(2)}MB`);
+          console.log(`Video uğurla endirildi: ${(videoBuffer.length / 1024 / 1024).toFixed(2)}MB`);
           
           // Send video buffer - let WhatsApp auto-detect mimetype
           await sock.sendMessage(extra.from, {
@@ -166,7 +166,7 @@ module.exports = {
           }, { quoted: msg });
         } catch (videoError) {
           console.error('Video download/send error:', videoError.message);
-          return await extra.reply('❌ Failed to download or send video. The video might be expired or require authentication.');
+          return await extra.reply('❌ Videonu endirmək və ya göndərmək alınmadı. Videonun vaxtı keçmiş ola bilər və ya identifikasiya tələb oluna bilər.');
         }
       } else {
         // For images, use the main image URL (not thumbnail)
@@ -178,7 +178,7 @@ module.exports = {
       
     } catch (error) {
       console.error('Error in pinterest command:', error);
-      return await extra.reply(`❌ Error: ${error.message || 'Unknown error occurred'}`);
+      return await extra.reply(`❌ Xəta: ${error.message || 'Naməlum xəta baş verdi'}`);
     }
   },
 };
