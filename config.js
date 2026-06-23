@@ -21,8 +21,8 @@ module.exports = {
     packname: 'Nexus MD ⚡',
     
     // Oyun ucun yer
-    GAME_TIME: '25000', // Oyunda novbeti soze kecid ucin vaxt
-    GAME_NEXT: '4',  // Oyun Sonlanma ucun saygac
+    GAME_TIME: 25000, // Oyunda novbeti soze kecid ucin vaxt
+    GAME_NEXT: 4,  // Oyun Sonlanma ucun saygac
     
     // Bot Behavior
     selfMode: false, // Private mode - only owner can use commands
