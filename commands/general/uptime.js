@@ -22,27 +22,27 @@ function formatUptime(seconds) {
   const parts = [];
   
   if (days > 0) {
-    parts.push(`${days} ${days === 1 ? 'day' : 'days'}`);
+    parts.push(`${days} ${days === 1 ? 'day' : 'gün'}`);
   }
   if (hours > 0) {
-    parts.push(`${hours} ${hours === 1 ? 'hour' : 'hours'}`);
+    parts.push(`${hours} ${hours === 1 ? 'hour' : 'saat'}`);
   }
   if (minutes > 0) {
-    parts.push(`${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`);
+    parts.push(`${minutes} ${minutes === 1 ? 'minute' : 'dəqiqə'}`);
   }
   if (secs > 0 || parts.length === 0) {
-    parts.push(`${secs} ${secs === 1 ? 'second' : 'seconds'}`);
+    parts.push(`${secs} ${secs === 1 ? 'second' : 'saniyə'}`);
   }
   
   return parts.join(', ');
 }
 
 module.exports = {
-  name: 'uptime',
-  aliases: ['runtime', 'botuptime', 'alive'],
+  name: 'alive',
+  aliases: ['runtime', 'botuptime', 'uptime'],
   category: 'general',
   description: 'Show how long the bot has been running',
-  usage: '.uptime',
+  usage: '.alive',
   
   async execute(sock, msg, args, extra) {
     try {
