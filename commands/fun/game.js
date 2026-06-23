@@ -59,8 +59,8 @@ async function novbetiSozeKec(sock, chatId) {
         sessiya.dogruCavabTapildi = false;
     }
 
-    if (sessiya.cavabsizSozSayi >= 4) {
-        await etibarliMesajGonder(sock, chatId, `💤 *Oyun Dayandırıldı!* Arxa-arxaya 4 sözə heç bir aktiv oyunçu cavab vermədiyi üçün oyun avtomatik bitdi.`);
+    if (sessiya.cavabsizSozSayi >= config.GAME_NEXT) {
+        await etibarliMesajGonder(sock, chatId, `💤 *Oyun Dayandırıldı!* Arxa-arxaya ${config.GAME_NEXT} sözə heç bir aktiv oyunçu cavab vermədiyi üçün oyun avtomatik bitdi.`);
         oyunuMexanikiDayandir(chatId);
         return;
     }
@@ -78,7 +78,7 @@ async function novbetiSozeKec(sock, chatId) {
 
     sessiya.sozTaymeri = setTimeout(() => {
         novbetiSozeKec(sock, chatId);
-    }, 25000);
+    }, config.GAME_TIME);
 }
 
 module.exports = {
@@ -209,13 +209,13 @@ if (activeCmd === 'reset') {
                 const sessiya = oyunlar[chatId];
                 const cariSoz = sessiya.sozler[sessiya.sozIndex];
 
-                const startMesaji = `🎮 *SÖZ OYUNU BAŞLADI!* 🎮\n\n👤 Oyunu başladan və ilk qoşulan: @${cleanSender}\n📢 Digər iştirakçılar qoşulmaq üçün *.join* yazmalıdır!\n\n⏱️ *HƏR SÖZ ÜÇÜN CƏMİ 25 SANİYƏNİZ VAR!*\n\n💡 İpucu: _${cariSoz.ipucu}_\n🔍 Söz: *${cariSoz.şablon}*`;
+                const startMesaji = `🎮 *SÖZ OYUNU BAŞLADI!* 🎮\n\n👤 Oyunu başladan və ilk qoşulan: @${cleanSender}\n📢 Digər iştirakçılar qoşulmaq üçün *.join* yazmalıdır!\n\n⏱️ *HƏR SÖZ ÜÇÜN CƏMİ ${config.GAME_TIME} SANİYƏNİZ VAR!*\n\n💡 İpucu: _${cariSoz.ipucu}_\n🔍 Söz: *${cariSoz.şablon}*`;
 
                 await etibarliMesajGonder(sock, chatId, startMesaji, [senderId], msg);
                 
                 sessiya.sozTaymeri = setTimeout(() => {
                     novbetiSozeKec(sock, chatId);
-                }, 7000);
+                }, config.GAME_TIME);
                 return;
             }
 
