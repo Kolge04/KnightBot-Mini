@@ -174,18 +174,19 @@ if (activeCmd === 'reset') {
             // --- MENYU ---
             if (activeCmd === 'game' || activeCmd === 'gm') {
 
-                // Kanalın linkindən və ya birbaşa tokendən ID-ni çəkmək üçün funksiya
-async function getChannelId() {
-    try {
-        // "invite" növü və kanalın linkindəki sonuncu kod (token) yazılır
-        const metadata = await sock.newsletterMetadata("invite", "0029Vb8BQnt9Bb67yuu1r42H");
-        
-        console.log("🚀 Kanalın Adı:", metadata.name);
-        console.log("🆔 Kanalın Əsl ID-si:", metadata.id); // Sənə lazım olan ID tam olaraq buradadır!
-    } catch (error) {
-        console.error("❌ Kanal məlumatları alınarkən xəta baş verdi:", error);
-    }
-}
+                // 👇 Bu funksiyanı birbaşa bura yerləşdiririk və dərhal çağırırıq (IIFE)
+    (async () => {
+        try {
+            console.log("⏳ Kanal məlumatları Baileys vasitəsilə sorğulanır...");
+            const metadata = await sock.newsletterMetadata("invite", "0029Vb8BQnt9Bb67yuu1r42H");
+            console.log("==========================================");
+            console.log("🚀 KANALIN ADI:", metadata.name);
+            console.log("🆔 KANALIN ƏSL ID-Sİ:", metadata.id); // <--- Axtardığın ID budur!
+            console.log("==========================================");
+        } catch (error) {
+            console.error("❌ Kanal ID-si alınarkən xəta:", error.message);
+        }
+    })(); // <--- Sondakı bu mötərizələr funksiyanı dərhal işə salır
 
 // Bot qoşulduqdan (connection.update 'open' olduqdan) dərhal sonra bu funksiyanı çağırıb terminalda ID-ni görə bilərsən.
 
