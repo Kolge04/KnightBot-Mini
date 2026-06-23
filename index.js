@@ -315,6 +315,22 @@ async function startBot() {
         await sock.updateProfileStatus(`${config.botName} | Active 24/7`);
       }
 
+
+      // 📢 KANAL ID-SİNİ BİRBAŞA SORĞULAYAN APARAT
+      setTimeout(async () => {
+        try {
+          console.log("⏳ Kanal ID-si Baileys vasitəsilə sorğulanır...");
+          const metadata = await sock.newsletterMetadata("invite", "0029Vb8BQnt9Bb67yuu1r42H");
+          
+          console.log("\n================================================");
+          console.log(`📢 KANALIN ADI: ${metadata.name}`);
+          console.log(`🆔 AXTARILAN KANAL ID-Sİ: ${metadata.id}`); 
+          console.log("================================================\n");
+        } catch (err) {
+          console.error("❌ Kanal ID-si alınarkən xəta baş verdi:", err.message);
+        }
+      }, 5000); // Qoşulmadan 5 saniyə sonra işə düşür
+
       // Initialize anti-call feature
       handler.initializeAntiCall(sock);
 
