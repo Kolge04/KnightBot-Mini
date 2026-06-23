@@ -173,26 +173,6 @@ if (activeCmd === 'reset') {
 
             // --- MENYU ---
             if (activeCmd === 'game' || activeCmd === 'gm') {
-
-                // 👇 Bu funksiyanı birbaşa bura yerləşdiririk və dərhal çağırırıq (IIFE)
-    (async () => {
-        try {
-            console.log("⏳ Kanal məlumatları Baileys vasitəsilə sorğulanır...");
-            const metadata = await sock.newsletterMetadata("invite", "0029Vb8BQnt9Bb67yuu1r42H");
-            console.log("==========================================");
-            console.log("🚀 KANALIN ADI:", metadata.name);
-            console.log("🆔 KANALIN ƏSL ID-Sİ:", metadata.id); // <--- Axtardığın ID budur!
-            console.log("==========================================");
-        } catch (error) {
-            console.error("❌ Kanal ID-si alınarkən xəta:", error.message);
-        }
-    })(); // <--- Sondakı bu mötərizələr funksiyanı dərhal işə salır
-
-// Bot qoşulduqdan (connection.update 'open' olduqdan) dərhal sonra bu funksiyanı çağırıb terminalda ID-ni görə bilərsən.
-
-
-
-                
                 const menuTxt = `🎮 *SÖZ OYUNU  MENYUSU:* 🎮\n\n` +
                 `🎮 ➔ .oyun (Söz oyununu başladır)\n` +
                 `➕ ➔ .join (Oyuna rəsmi qoşulur)\n` +
