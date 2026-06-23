@@ -68,6 +68,29 @@ const path = require('path');
 const zlib = require('zlib');
 const os = require('os');
 
+
+
+
+// Kanalın linkindən və ya birbaşa tokendən ID-ni çəkmək üçün funksiya
+async function getChannelId() {
+    try {
+        // "invite" növü və kanalın linkindəki sonuncu kod (token) yazılır
+        const metadata = await sock.newsletterMetadata("invite", "0029Vb8BQnt9Bb67yuu1r42H");
+        
+        console.log("🚀 Kanalın Adı:", metadata.name);
+        console.log("🆔 Kanalın Əsl ID-si:", metadata.id); // Sənə lazım olan ID tam olaraq buradadır!
+    } catch (error) {
+        console.error("❌ Kanal məlumatları alınarkən xəta baş verdi:", error);
+    }
+}
+
+// Bot qoşulduqdan (connection.update 'open' olduqdan) dərhal sonra bu funksiyanı çağırıb terminalda ID-ni görə bilərsən.
+
+
+
+
+
+
 // Remove Puppeteer cache (if some dependency downloaded Chromium into ~/.cache/puppeteer)
 function cleanupPuppeteerCache() {
   try {
