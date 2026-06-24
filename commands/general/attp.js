@@ -17,12 +17,12 @@ module.exports = {
   async execute(sock, msg, args, extra) {
     try {
       if (args.length === 0) {
-        return extra.reply(`❌ Please provide text!\n\nExample: ${extra.prefix || '.'}attp Hello World`);
+        return extra.reply(`❌ Zəhmət olmasa mətn təqdim edin!\n\nMisal: ${extra.prefix || '.'}attp Salam Dünya`);
       }
       
       const text = args.join(' ');
       if (text.length > 50) {
-        return extra.reply('❌ Text is too long! Maximum 50 characters.');
+        return extra.reply('❌ Mətn çox uzundur! Maksimum 50 simvol.');
       }
       
       try {
@@ -30,12 +30,12 @@ module.exports = {
         const webpBuffer = await writeExifVid(mp4Buffer, { packname: 'Knight Bot' });
         await sock.sendMessage(extra.from, { sticker: webpBuffer }, { quoted: msg });
       } catch (error) {
-        console.error('Error generating attp sticker:', error);
-        await extra.reply('❌ Failed to generate the sticker.');
+        console.error('attp stikerinin yaradılması xətası:', error);
+        await extra.reply('❌ Stiker yaratmaq alınmadı.');
       }
     } catch (error) {
       console.error('ATTP command error:', error);
-      await extra.reply('❌ An error occurred while creating animated sticker!');
+      await extra.reply('❌ Animasiyalı stiker yaradarkən xəta baş verdi!');
     }
   }
 };
