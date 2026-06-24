@@ -38,7 +38,7 @@ module.exports = {
       
       if (!text) {
         return await sock.sendMessage(msg.key.remoteJid, { 
-          text: 'Zəhmət olmasa video üçün TikTok linkini təqdim edin.' 
+          text: 'Zəhmət olmasa video üçün TikTok linkini təqdim edin.\n\n- .tt https://vt.tiktok.com/ZSCNLDAa2/' 
         }, { quoted: msg });
       }
       
@@ -47,7 +47,7 @@ module.exports = {
       
       if (!url) {
         return await sock.sendMessage(msg.key.remoteJid, { 
-          text: 'Zəhmət olmasa video üçün TikTok linkini təqdim edin.' 
+          text: 'Zəhmət olmasa video üçün TikTok linkini təqdim edin.\n\n- .tt https://vt.tiktok.com/ZSCNLDAa2/' 
         }, { quoted: msg });
       }
       
@@ -143,7 +143,7 @@ module.exports = {
             }
             
             const botName = config.botName.toUpperCase();
-            const caption = title ? `*Yüklədi.. ${botName}*\n\n📝 Başlıq: ${title}` : `*Yüklədi.. ${botName}*`;
+            const caption = title ? `*Loqosuz TikTok Videosu*\n\n*Yüklədi.. ${botName}*\n\n📝 Başlıq: ${title}` : `*Yüklədi.. ${botName}*`;
             
             await sock.sendMessage(msg.key.remoteJid, {
               video: videoBuffer,
@@ -157,7 +157,7 @@ module.exports = {
             // Fallback to URL method
             try {
               const botName = config.botName.toUpperCase();
-              const caption = title ? `*Yüklədi.. ${botName}*\n\n📝 Başlıq: ${title}` : `*Yüklədi... ${botName}*`;
+              const caption = title ? `*Loqosuz TikTok Videosu*\n\n*Yüklədi.. ${botName}*\n\n📝 Başlıq: ${title}` : `*Yüklədi... ${botName}*`;
               
               await sock.sendMessage(msg.key.remoteJid, {
                 video: { url: videoUrl },
