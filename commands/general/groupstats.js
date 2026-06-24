@@ -37,7 +37,7 @@ module.exports = {
 👥 *Ən Aktiv Üzvlər:*
 ${topText}
 
-Statistikaya baxmaq üçün .myactivity yazın.
+Statistikaya baxmaq üçün .mystat yazın.
 `.trim();
 
             await sock.sendMessage(from, {
