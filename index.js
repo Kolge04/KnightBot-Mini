@@ -242,7 +242,10 @@ async function startBot() {
     syncFullHistory: false,
     downloadHistory: false,
     markOnlineOnConnect: false,
-    getMessage: async () => undefined // Don't load messages from store
+    getMessage: async (key) => {
+    return await store.loadMessage(key.remoteJid, key.id);
+}
+    //getMessage: async () => undefined // Don't load messages from store
   });
 
   // Bind store to socket
@@ -465,14 +468,33 @@ async function startBot() {
           const originalMsg = await store.loadMessage(from, update.key.id);
 
           if (originalMsg && originalMsg.message) {
-            const oldText = originalMsg.message.conversation || 
-                            originalMsg.message.extendedTextMessage?.text || 
-                            (originalMsg.message.imageMessage ? '[📸 Şəkil Mesajı]' : null) || 
-                            (originalMsg.message.videoMessage ? '[🎥 Video Mesajı]' : null) || 
-                            (originalMsg.message.stickerMessage ? '[✨ Stiker]' : null) ||
-                            (originalMsg.message.audioMessage ? '[🎵 Səs Yazısı / Audio]' : null) ||
-                            (originalMsg.message.documentMessage ? '[📁 Sənəd / Fayl]' : null) ||
-                            '📝 Media və ya Sənəd';
+            // Baileys-in fərqli mesaj strukturlarını (məs. ephemeral) təmizləyib əsas obyekti tapırıq
+            const msgContent = originalMsg.message.ephemeralMessage?.message || originalMsg.message;
+            
+            let oldText = null;
+
+            // 1. İlk olaraq medianın növünü dəqiq yoxlayırıq
+            if (msgContent.imageMessage) {
+              oldText = msgContent.imageMessage.caption ? `[📸 Şəkil] Alt yazı: ${msgContent.imageMessage.caption}` : '[📸 Şəkil Mesajı]';
+            } else if (msgContent.videoMessage) {
+              oldText = msgContent.videoMessage.caption ? `[🎥 Video] Alt yazı: ${msgContent.videoMessage.caption}` : '[🎥 Video Mesajı]';
+            } else if (msgContent.stickerMessage) {
+              oldText = '[✨ Stiker]';
+            } else if (msgContent.audioMessage) {
+              oldText = '[🎵 Səs Yazısı / Audio]';
+            } else if (msgContent.documentMessage) {
+              oldText = `[📁 Sənəd / Fayl] Adı: ${msgContent.documentMessage.fileName || 'Bilinmir'}`;
+            } else if (msgContent.viewOnceMessage?.message?.imageMessage || msgContent.viewOnceMessageV2?.message?.imageMessage) {
+              oldText = '[👁️ Bir dəfəlik baxılan şəkil]';
+            } else if (msgContent.viewOnceMessage?.message?.videoMessage || msgContent.viewOnceMessageV2?.message?.videoMessage) {
+              oldText = '[👁️ Bir dəfəlik baxılan video]';
+            } 
+            // 2. Əgər media deyil fərz ediriksə, normal mətnləri yoxlayırıq
+            else {
+              oldText = msgContent.conversation || 
+                        msgContent.extendedTextMessage?.text || 
+                        '📝 Media və ya Sənəd';
+            }
 
             const timestamp = originalMsg.messageTimestamp;
             const vaxt = timestamp ? new Date(timestamp * 1000).toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' }) : "Bilinmir";
@@ -493,6 +515,9 @@ async function startBot() {
       }
     }
   });
+
+
+  
   // Group participant updates (join/leave)
   sock.ev.on('group-participants.update', async (update) => {
     await handler.handleGroupUpdate(sock, update);
