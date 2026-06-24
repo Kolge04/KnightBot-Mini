@@ -22,7 +22,9 @@ module.exports = {
     
     // Oyun ucun yer
     GAME_TIME: 25000, // Oyunda novbeti soze kecid ucin vaxt
+    GAME_TAIM: 25,  // SANIYENI BURA YAZ (25000 = 25 SANIYE)
     GAME_NEXT: 4,  // Oyun Sonlanma ucun saygac
+    
     
     // Bot Behavior
     selfMode: false, // Private mode - only owner can use commands
