@@ -25,7 +25,7 @@ module.exports = {
       if (!ctx?.quotedMessage || !ctx?.stanzaId) {
         return await sock.sendMessage(
           chatId,
-          { text: '🗑️ Reply to a *view-once* message to reveal it.' },
+          { text: '🗑️ Bunu aşkar etmək üçün *bir dəfə baxmaq* mesajına cavab verin.' },
           { quoted: msg }
         );
       }
@@ -45,7 +45,7 @@ module.exports = {
       if (!hasViewOnce) {
         return await sock.sendMessage(
           chatId,
-          { text: '❌ This is not a view-once message!' },
+          { text: '❌ Bu bir dəfə baxılan mesaj deyil!' },
           { quoted: msg }
         );
       }
@@ -83,7 +83,7 @@ module.exports = {
       if (!actualMsg || !mtype) {
         return await sock.sendMessage(
           chatId,
-          { text: '❌ Unsupported view-once message type.' },
+          { text: '❌ Dəstəklənməyən bir dəfə baxılan mesaj növü.' },
           { quoted: msg }
         );
       }
@@ -144,7 +144,7 @@ module.exports = {
         msg.key.remoteJid,
         {
           text:
-            '❌ Error processing view-once message: ' +
+            '❌ Bir dəfə baxmaq mesajını emal edərkən xəta baş verdi: ' +
             (error.message || 'Unknown error')
         },
         { quoted: msg }
