@@ -34,7 +34,7 @@ module.exports = {
 📊 *Bugünkü Fəaliyyətiniz*
 
 👤 *User:* @${sender.split('@')[0]}
-📝 * Mesaj sayı:* ${userCount}
+📝 *Mesaj sayı:* ${userCount}
 📈 *Sizin Paylaşımınız:* ${percentage}%
 🏆 *Rütbə:* #${rank} of ${sortedUsers.length}
 
