@@ -366,69 +366,6 @@ async function startBot() {
 
 
 
-      // =========================================================================
-  // 🕵️‍♂️ HƏM QRUPDA, HƏM ÖZƏLDƏ AVTOMATİK SİLİNƏN MESAJLARI TUTMA MEXANİZMİ
-  // =========================================================================
-  sock.ev.on('messages.update', async (updates) => {
-    for (const update of updates) {
-      // Baileys-də mesajın silindiyini göstərən ən zəmanətli şərt kombinasiyası
-      const isDeleted = update.update.message === null || 
-                        update.update.clearMediaKey || 
-                        update.update.message?.protocolMessage?.type === 0 ||
-                        update.update.message?.protocolMessage?.type === 'REVOKE';
-
-      if (isDeleted) {
-        try {
-          const from = update.key.remoteJid;
-          
-          // Sistem mesajlarını, statusları və kanalları bloklayırıq
-          if (!from || from.includes('@broadcast') || from.includes('status.broadcast') || from.includes('@newsletter')) continue;
-
-          // Mesajı silən şəxsin ID-si (Qrupdursa ortaq iştirakçı, özəldirsə qarşı tərəfin özü)
-          const senderId = update.key.participant || update.key.remoteJid;
-          const cleanSender = senderId.split('@')[0].split(':')[0];
-
-          // Əgər mesajı silən elə botun özüdürsə, ifşa etməsin (səssiz ötür)
-          if (senderId.includes(sock.user.id.split(':')[0])) continue;
-
-          // Sənin faylındakı xüsusi Map-əsaslı store sistemindən köhnə orijinal mesajı çəkirik
-          const originalMsg = await store.loadMessage(from, update.key.id);
-
-          // Əgər mesaj silinməzdən əvvəl bot aktiv olubsa və onu RAM-da tutubsa
-          if (originalMsg && originalMsg.message) {
-            
-            // Mesaj növlərini tək-tək analiz edirik
-            const oldText = originalMsg.message.conversation || 
-                            originalMsg.message.extendedTextMessage?.text || 
-                            (originalMsg.message.imageMessage ? '[📸 Şəkil Mesajı]' : null) || 
-                            (originalMsg.message.videoMessage ? '[🎥 Video Mesajı]' : null) || 
-                            (originalMsg.message.stickerMessage ? '[✨ Stiker]' : null) ||
-                            (originalMsg.message.audioMessage ? '[🎵 Səs Yazısı / Audio]' : null) ||
-                            (originalMsg.message.documentMessage ? '[📁 Sənəd / Fayl]' : null) ||
-                            '📝 Media və ya Sənəd';
-
-            // Mesajın yazılma vaxtını hesablayırıq
-            const timestamp = originalMsg.messageTimestamp;
-            const vaxt = timestamp ? new Date(timestamp * 1000).toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' }) : "Bilinmir";
-
-            // İfşa bildiriş mətnimiz
-            let bildirisMetni = `🕵️‍♂️ *BİR MESAJ SİLİNDİ (AVTO)!* 🕵️‍♂️\n\n` +
-                                `👤 *Göndərən:* @${cleanSender}\n` +
-                                `🕒 *Yazılma vaxtı:* ${vaxt}\n` +
-                                `💬 *Silinən mətn/media:* \n\n> _${oldText}_`;
-
-            // Mesajı həmin çata (qrup və ya özəl) avtomatik göndəririk
-            await sock.sendMessage(from, {
-              text: bildirisMetni,
-              mentions: [senderId]
-            }, { quoted: originalMsg }); // Köhnə silinən mesajı altda sitat (quote) kimi göstərir
-          }
-        } catch (err) {
-          // Sistem stabil qalsın deyə xətaları arxa fonda səssiz keçirik
-        }
-      }
-    }
-  });
 
       // Deduplication: Skip if message has already been processed
       const msgId = msg.key.id;
@@ -505,11 +442,57 @@ async function startBot() {
     // Silently handle receipt updates
   });
 
-  // Message updates (silently handled, no logging)
-  sock.ev.on('messages.update', () => {
-    // Silently handle message updates
-  });
+  // =========================================================================
+  // 🕵️‍♂️ HƏM QRUPDA, HƏM ÖZƏLDƏ AVTOMATİK SİLİNƏN MESAJLARI TUTMA MEXANİZMİ
+  // =========================================================================
+  sock.ev.on('messages.update', async (updates) => {
+    for (const update of updates) {
+      const isDeleted = update.update.message === null || 
+                        update.update.clearMediaKey || 
+                        update.update.message?.protocolMessage?.type === 0 ||
+                        update.update.message?.protocolMessage?.type === 'REVOKE';
 
+      if (isDeleted) {
+        try {
+          const from = update.key.remoteJid;
+          if (!from || from.includes('@broadcast') || from.includes('status.broadcast') || from.includes('@newsletter')) continue;
+
+          const senderId = update.key.participant || update.key.remoteJid;
+          const cleanSender = senderId.split('@')[0].split(':')[0];
+
+          if (senderId.includes(sock.user.id.split(':')[0])) continue;
+
+          const originalMsg = await store.loadMessage(from, update.key.id);
+
+          if (originalMsg && originalMsg.message) {
+            const oldText = originalMsg.message.conversation || 
+                            originalMsg.message.extendedTextMessage?.text || 
+                            (originalMsg.message.imageMessage ? '[📸 Şəkil Mesajı]' : null) || 
+                            (originalMsg.message.videoMessage ? '[🎥 Video Mesajı]' : null) || 
+                            (originalMsg.message.stickerMessage ? '[✨ Stiker]' : null) ||
+                            (originalMsg.message.audioMessage ? '[🎵 Səs Yazısı / Audio]' : null) ||
+                            (originalMsg.message.documentMessage ? '[📁 Sənəd / Fayl]' : null) ||
+                            '📝 Media və ya Sənəd';
+
+            const timestamp = originalMsg.messageTimestamp;
+            const vaxt = timestamp ? new Date(timestamp * 1000).toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' }) : "Bilinmir";
+
+            let bildirisMetni = `🕵️‍♂️ *BİR MESAJ SİLİNDİ (AVTO)!* 🕵️‍♂️\n\n` +
+                                `👤 *Göndərən:* @${cleanSender}\n` +
+                                `🕒 *Yazılma vaxtı:* ${vaxt}\n` +
+                                `💬 *Silinən mətn/media:* \n\n> _${oldText}_`;
+
+            await sock.sendMessage(from, {
+              text: bildirisMetni,
+              mentions: [senderId]
+            }, { quoted: originalMsg });
+          }
+        } catch (err) {
+          // Xətaları səssiz keçirik
+        }
+      }
+    }
+  });
   // Group participant updates (join/leave)
   sock.ev.on('group-participants.update', async (update) => {
     await handler.handleGroupUpdate(sock, update);
