@@ -2,18 +2,19 @@ const { downloadMediaMessage } = require('@whiskeysockets/baileys');
 const FormData = require('form-data');
 const crypto = require('crypto');
 const axios = require('axios');
+const config = require('../../config'); // Config faylından məlumatları çəkirik
 
-// ⚠️ BURANI ACRCLOUD-DAN ALDIĞIN MƏLUMATLARLA DOLDUR!
-const ACR_HOST = 'identify-ap-southeast-1.acrcloud.com';
-const ACR_ACCESS_KEY = 'e7ce31706d1fff7d677552b48340f9d7';
-const ACR_SECRET = 'oUA8Wq3M4HQDIlSNoUIBXqAkx2jnxjHV0csxZnHR';
+// Məlumatları birbaşa sənin config.js faylından mənimsədirik
+const ACR_HOST = config.ACR_HOST;
+const ACR_ACCESS_KEY = config.ACR_ACCESS_KEY;
+const ACR_SECRET = config.ACR_SECRET;
 
 module.exports = {
   name: 'shazam',
   aliases: ['shaz', 'tap', 'mahnitap'],
   category: 'media',
-  description: 'Cavab (reply) verilən səs yazısının hansı mahnı olduğunu tapır',
-  usage: '.shazam (səs yazısına cavab olaraq)',
+  description: 'Cavab (reply) verilən səs yazısı və ya videodakı mahnını tapır',
+  usage: '.shazam (səsə və ya videoya cavab olaraq)',
 
   async execute(sock, msg, args, extra) {
     try {
@@ -23,13 +24,15 @@ module.exports = {
       const quotedMsg = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
       
       if (!quotedMsg) {
-        return sock.sendMessage(chatId, { text: '❌ Zəhmət olmasa tapmaq istədiyiniz bir səs yazısına və ya audioya *reply (cavab)* yazaraq bu əmri işlədin.' }, { quoted: msg });
+        return sock.sendMessage(chatId, { text: '❌ Zəhmət olmasa tapmaq istədiyiniz bir *səs yazısına* və ya *videoya* reply (cavab) yazaraq bu əmri işlədin.' }, { quoted: msg });
       }
 
-      // 2. YALNIZ SƏS VƏ AUDİO YOXLAMASI (Mətn, stiker və s. bloklanır)
+      // 2. SƏS VƏ VİDEO YOXLAMASI (Mətn, stiker və s. bloklanır)
       const isAudio = quotedMsg.audioMessage;
-      if (!isAudio) {
-        return sock.sendMessage(chatId, { text: '⚠️ Bu səs yazısı deyil! .shazam əmri yalnız səs qeydləri və audio fayllar üzərində işləyir.' }, { quoted: msg });
+      const isVideo = quotedMsg.videoMessage;
+
+      if (!isAudio && !isVideo) {
+        return sock.sendMessage(chatId, { text: '⚠️ Bu səs yazısı və ya video deyil! .shazam əmri yalnız səs qeydləri və videolar üzərində işləyir.' }, { quoted: msg });
       }
 
       // Baileys üçün düzgün kontekst obyektini qururuq
@@ -43,15 +46,24 @@ module.exports = {
         message: quotedMsg
       };
 
-      await sock.sendMessage(chatId, { text: '🔍 *Səs analiz edilir, mahnı axtarılır... Lütfən gözləyin...*' }, { quoted: msg });
+      // Medianın növünə uyğun olaraq istifadəçiyə bildiriş göndəririk
+      const mediaType = isAudio ? 'Səs' : 'Video';
+      await sock.sendMessage(chatId, { text: `🔍 *${mediaType} yüklənir və analiz edilir, mahnı axtarılır... Lütfən gözləyin...*` }, { quoted: msg });
 
-      // 3. Səs faylını WhatsApp serverlərindən buffer olaraq endiririk
+      // 3. Media faylını (Səs və ya Video) WhatsApp serverlərindən buffer olaraq endiririk
+      // Baileys 'audio' və ya 'video' növünü avtomatik təyin edir
+      const downloadType = isAudio ? 'buffer' : 'buffer'; 
       const buffer = await downloadMediaMessage(fakeOriginalMsg, 'buffer', {}, {
         logger: extra.logger || console
       });
 
       if (!buffer) {
-        return sock.sendMessage(chatId, { text: '❌ Səs faylını yükləmək mümkün olmadı.' }, { quoted: msg });
+        return sock.sendMessage(chatId, { text: `❌ ${mediaType} faylını yükləmək mümkün olmadı.` }, { quoted: msg });
+      }
+
+      // Config yoxlaması - Əgər açarlar boşdursa xəbərdarlıq etsin
+      if (!ACR_HOST || !ACR_ACCESS_KEY || !ACR_SECRET) {
+        return sock.sendMessage(chatId, { text: '❌ Sistem xətası: `config.js` faylında ACRCloud (Shazam) açarları tapılmadı!' }, { quoted: msg });
       }
 
       // 4. ACRCloud API üçün İmza (Signature) hazırlığı
@@ -74,9 +86,13 @@ module.exports = {
 
       // FormData strukturunu yığırıq
       const form = new FormData();
-      form.append('sample', buffer, { filename: 'audio.mp3', contentType: 'audio/mp3' });
+      // Videodursa mp4, səddirsə mp3 olaraq tanıtdırırıq (API hər iki strukturu qəbul edir)
+      const filename = isAudio ? 'audio.mp3' : 'video.mp4';
+      const contentType = isAudio ? 'audio/mp3' : 'video/mp4';
+
+      form.append('sample', buffer, { filename, contentType });
       form.append('access_key', ACR_ACCESS_KEY);
-      form.append('data_type', 'audio');
+      form.append('data_type', 'audio'); // API arxa fonda audio axınını oxuyacaq
       form.append('signature_version', '1');
       form.append('signature', signature);
       form.append('sample_bytes', buffer.length);
@@ -85,7 +101,7 @@ module.exports = {
       // API-yə sorğu göndəririk
       const response = await axios.post(`https://${ACR_HOST}/v1/identify`, form, {
         headers: form.getHeaders(),
-        timeout: 15000
+        timeout: 20000 // Videolar bir az daha böyük ola bilər deyə timeout-u 20 saniyə etdik
       });
 
       const result = response.data;
@@ -98,17 +114,16 @@ module.exports = {
         const album = music.album?.name || 'Bilinmir';
         const releaseDate = music.release_date || 'Bilinmir';
 
-        let cavabMetni = `🎵 *MAHNI TAPILDI! (Shazam)* 🎵\n\n` +
+        let cavabMetni = `🎵 *MAHNI TAPILDI!* ${config.botName}🎵\n\n` +
                           `🎼 *Mahnı adı:* ${title}\n` +
                           `👤 *Müənnif (Artist):* ${artist}\n` +
                           `💿 *Albom:* ${album}\n` +
                           `📅 *Buraxılış ili:* ${releaseDate}\n\n` +
-                          `🤖 _Bot tərəfindən uğurla tapıldı!_`;
+                          `✅ _Uğurla tapıldı!_`;
 
         await sock.sendMessage(chatId, { text: cavabMetni }, { quoted: msg });
       } else {
-        // Əgər tapılmadısa və ya səs çox qısadırsa
-        await sock.sendMessage(chatId, { text: '🤷‍♂️ Təəssüf ki, bu səsdəki mahnını tanıya bilmədim. Səs çox qısa, kəsintili və ya kənar səs-küylü ola bilər.' }, { quoted: msg });
+        await sock.sendMessage(chatId, { text: `🤷‍♂️ Təəssüf ki, bu ${mediaType.toLowerCase()} daxilindəki mahnını tanıya bilmədim. Səs çox boğuq, qısa və ya musiqisiz ola bilər.` }, { quoted: msg });
       }
 
     } catch (error) {
