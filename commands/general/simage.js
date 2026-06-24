@@ -9,12 +9,12 @@ module.exports = {
   name: 'simage',
   aliases: ['toimg', 'stickertoimg', 'sticker2img', 'svideo'],
   category: 'general',
-  description: 'Convert sticker to image (PNG)',
+  description: 'Stikeri şəklə çevir (PNG)',
   usage: '.simage (reply to sticker)',
   
   async execute(sock, msg, args, extra) {
     try {
-      const notStickerMessage = '📎 Reply to a sticker to convert it to image!';
+      const notStickerMessage = '📎 Şəkilə çevirmək üçün stikerə cavab verin';
       
       // Check if message is a reply
       const ctxInfo = msg.message?.extendedTextMessage?.contextInfo;
@@ -46,7 +46,7 @@ module.exports = {
       );
       
       if (!stickerBuffer) {
-        return await extra.reply('❌ Failed to download sticker. Please try again.');
+        return await extra.reply('❌ Stikeri endirmək alınmadı. Yenidən cəhd edin.');
       }
       
       // Check if sticker is animated
@@ -58,13 +58,13 @@ module.exports = {
         const mp4Buffer = await webp2mp4(stickerBuffer);
         
         if (!mp4Buffer || mp4Buffer.length === 0) {
-          throw new Error('MP4 buffer is empty or null');
+          throw new Error('MP4 buferi boş və ya sıfırdır');
         }
         
         // Check file size (WhatsApp has limits)
         const maxSize = 16 * 1024 * 1024; // 16MB for videos
         if (mp4Buffer.length > maxSize) {
-          throw new Error(`MP4 file too large: ${(mp4Buffer.length / 1024 / 1024).toFixed(2)}MB`);
+          throw new Error(`MP4 fayl çox böyükdür: ${(mp4Buffer.length / 1024 / 1024).toFixed(2)}MB`);
         }
         
         // Send as MP4 video
@@ -84,8 +84,8 @@ module.exports = {
       }
       
     } catch (error) {
-      console.error('Error in simage command:', error);
-      await extra.reply(`❌ Failed to convert sticker to image.\n\nError: ${error.message}`);
+      console.error('Simage əmrində xəta:', error);
+      await extra.reply(`❌ Stikeri şəklə çevirmək alınmadı.\n\nXəta: ${error.message}`);
     }
   }
 };
