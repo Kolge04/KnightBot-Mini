@@ -24,7 +24,13 @@ module.exports = {
     GAME_TIME: 25000, // Oyunda novbeti soze kecid ucin vaxt
     GAME_TAIM: 25,  // SANIYENI BURA YAZ (25000 = 25 SANIYE)
     GAME_NEXT: 4,  // Oyun Sonlanma ucun saygac
-    
+
+
+    // SHAZAM 
+    ACR_HOST: 'identify-ap-southeast-1.acrcloud.com',
+    ACR_ACCESS_KEY: 'e7ce31706d1fff7d677552b48340f9d7',
+    ACR_SECRET: 'oUA8Wq3M4HQDIlSNoUIBXqAkx2jnxjHV0csxZnHR',
+
     
     // Bot Behavior
     selfMode: false, // Private mode - only owner can use commands
