@@ -114,9 +114,9 @@ module.exports = {
         const album = music.album?.name || 'Bilinmir';
         const releaseDate = music.release_date || 'Bilinmir';
 
-        let cavabMetni = `🎵 *MAHNI TAPILDI!* ${config.botName}🎵\n\n` +
+        let cavabMetni = `🎵 MAHNI TAPILDI! *${config.botName}*\n\n` +
                           `🎼 *Mahnı adı:* ${title}\n` +
-                          `👤 *Müənnif (Artist):* ${artist}\n` +
+                          `👤 *Müəllif (Artist):* ${artist}\n` +
                           `💿 *Albom:* ${album}\n` +
                           `📅 *Buraxılış ili:* ${releaseDate}\n\n` +
                           `✅ _Uğurla tapıldı!_`;
