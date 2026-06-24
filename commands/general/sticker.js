@@ -19,7 +19,7 @@ const MAX_FILE_SIZE = 50 * 1024 * 1024;
 module.exports = {
   name: 'sticker',
   aliases: ['s', 'stiker', 'stc'],
-  description: 'Convert image or video to sticker (auto compression)',
+  description: 'Şəkli və ya videonu stikerə çevirin (avtomatik sıxılma)',
   usage: '.sticker (reply to media)',
   category: 'general',
   
@@ -46,7 +46,7 @@ module.exports = {
       targetMessage.message?.documentMessage;
     
     if (!mediaMessage) {
-      return extra.reply('📎 Reply to an *image* / *video* with .sticker or send media with .sticker as caption.');
+      return extra.reply('📎 *şəklə* / *videoya* .sticker ilə cavab verin və ya medianı başlıq olaraq .sticker ilə göndərin.');
     }
     
     const tempDir = getTempDir();
@@ -64,13 +64,13 @@ module.exports = {
       );
       
       if (!mediaBuffer) {
-        await extra.reply('❌ Failed to download media. Please try again.');
+        await extra.reply('❌ Medianı endirmək alınmadı. Yenidən cəhd edin.');
         return;
       }
       
       // Check file size
       if (mediaBuffer.length > MAX_FILE_SIZE) {
-        await extra.reply(`❌ File too large: ${(mediaBuffer.length / 1024 / 1024).toFixed(2)}MB (max: ${MAX_FILE_SIZE / 1024 / 1024}MB)`);
+        await extra.reply(`❌ Fayl çox böyükdür: ${(mediaBuffer.length / 1024 / 1024).toFixed(2)}MB (max: ${MAX_FILE_SIZE / 1024 / 1024}MB)`);
         return;
       }
       
@@ -135,7 +135,7 @@ module.exports = {
       
     } catch (error) {
       console.error('Sticker command error:', error);
-      await extra.reply('❌ Failed to create sticker. Make sure the media is valid.');
+      await extra.reply('❌ Stiker yaratmaq alınmadı. Medianın etibarlı olduğundan əmin olun.');
     } finally {
       // Always cleanup temp files
       tempFiles.forEach(file => deleteTempFile(file));
