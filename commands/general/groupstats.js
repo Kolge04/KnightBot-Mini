@@ -16,7 +16,7 @@ module.exports = {
             const stats = getStats(from);
 
             if (!stats)
-                return extra.reply('📊 No activity recorded today.');
+                return extra.reply('📊 Bu gün heç bir fəaliyyət qeydə alınmayıb.');
 
             const { total, users } = stats;
 
@@ -30,14 +30,14 @@ module.exports = {
                 : 'No active users yet.';
 
             const text = `
-📊 *Group Stats — Today*
+📊 *Qrup Statistikası - Bu gün*
 
-📌 *Total Messages:* ${total}
+📌 *Ümumi Mesajlar:* ${total}
 
-👥 *Top Active Members:*
+👥 *Ən Aktiv Üzvlər:*
 ${topText}
 
-Type .myactivity to see your stats.
+Statistikaya baxmaq üçün .myactivity yazın.
 `.trim();
 
             await sock.sendMessage(from, {
@@ -47,7 +47,7 @@ Type .myactivity to see your stats.
 
         } catch (err) {
             console.error('[groupstats cmd] error:', err);
-            extra.reply('❌ Error loading stats.');
+            extra.reply('❌ Statistikanı yükləmə xətası.');
         }
     }
 };
