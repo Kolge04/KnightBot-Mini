@@ -33,7 +33,7 @@ module.exports = {
     const stickerMsg = targetMessage.message?.stickerMessage;
     
     if (!stickerMsg) {
-      return extra.reply('🎭 Reply to a *sticker* with `.take` to steal it.');
+      return extra.reply('🎭 Oğurlamaq üçün *stikerə* `.take` ilə cavab verin.');
     }
     
     try {
