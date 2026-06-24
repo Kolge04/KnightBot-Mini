@@ -14,14 +14,14 @@ module.exports = {
   async execute(sock, msg, args, extra) {
     try {
       if (args.length === 0) {
-        return extra.reply('❌ Please provide a website URL!\n\nExample: .ssweb https://github.com');
+        return extra.reply('❌ Lütfən, vebsayt URL-ni təqdim edin!\n\nMəsələn: .ssweb https://github.com');
       }
       
       const url = args.join(' ');
       
       // Validate URL
       if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        return extra.reply('❌ Please provide a valid URL starting with http:// or https://');
+        return extra.reply('❌ Lütfən, http:// və ya https:// ilə başlayan etibarlı URL təqdim edin');
       }
       
       await sock.sendMessage(extra.from, {
@@ -36,7 +36,7 @@ module.exports = {
       
     } catch (error) {
       console.error('SSWeb command error:', error);
-      await extra.reply(`❌ Failed to screenshot website: ${error.message}`);
+      await extra.reply(`❌ Veb saytın ekran görüntüsünü çəkmək alınmadı: ${error.message}`);
     }
   }
 };
