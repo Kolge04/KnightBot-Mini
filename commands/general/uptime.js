@@ -22,7 +22,7 @@ function formatUptime(seconds) {
   const parts = [];
   
   if (days > 0) {
-    parts.push(`${days} ${days === 1 ? 'day' : 'gün'}`);
+    parts.push(`${days} ${days === 1 ? 'day' : 'gun'}`);
   }
   if (hours > 0) {
     parts.push(`${hours} ${hours === 1 ? 'hour' : 'saat'}`);
