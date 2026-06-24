@@ -441,13 +441,22 @@ async function startBot() {
   });
 
   // Message receipt updates (silently handled, no logging)
-  sock.ev.on('message-receipt.update', () => {
+  //sock.ev.on('message-receipt.update', () => {
     // Silently handle receipt updates
-  });
+  //});
+
+  getMessage: async (key) => {
+    return await store.loadMessage(key.remoteJid, key.id);
+}
+
+
+
 
   // =========================================================================
-  // 🕵️‍♂️ HƏM QRUPDA, HƏM ÖZƏLDƏ AVTOMATİK SİLİNƏN MESAJLARI TUTMA MEXANİZMİ
+  // 🕵️‍♂️ AVTOMATİK SİLİNƏN MEDİALARI (ŞƏKİL, SƏS, STİKER) VƏ MƏTNİ BƏRPA ETMƏK
   // =========================================================================
+  const { downloadMediaMessage } = require('@whiskeysockets/baileys');
+
   sock.ev.on('messages.update', async (updates) => {
     for (const update of updates) {
       const isDeleted = update.update.message === null || 
@@ -468,49 +477,63 @@ async function startBot() {
           const originalMsg = await store.loadMessage(from, update.key.id);
 
           if (originalMsg && originalMsg.message) {
-            // Baileys-in fərqli mesaj strukturlarını (məs. ephemeral) təmizləyib əsas obyekti tapırıq
             const msgContent = originalMsg.message.ephemeralMessage?.message || originalMsg.message;
             
-            let oldText = null;
-
-            // 1. İlk olaraq medianın növünü dəqiq yoxlayırıq
-            if (msgContent.imageMessage) {
-              oldText = msgContent.imageMessage.caption ? `[📸 Şəkil] Alt yazı: ${msgContent.imageMessage.caption}` : '[📸 Şəkil Mesajı]';
-            } else if (msgContent.videoMessage) {
-              oldText = msgContent.videoMessage.caption ? `[🎥 Video] Alt yazı: ${msgContent.videoMessage.caption}` : '[🎥 Video Mesajı]';
-            } else if (msgContent.stickerMessage) {
-              oldText = '[✨ Stiker]';
-            } else if (msgContent.audioMessage) {
-              oldText = '[🎵 Səs Yazısı / Audio]';
-            } else if (msgContent.documentMessage) {
-              oldText = `[📁 Sənəd / Fayl] Adı: ${msgContent.documentMessage.fileName || 'Bilinmir'}`;
-            } else if (msgContent.viewOnceMessage?.message?.imageMessage || msgContent.viewOnceMessageV2?.message?.imageMessage) {
-              oldText = '[👁️ Bir dəfəlik baxılan şəkil]';
-            } else if (msgContent.viewOnceMessage?.message?.videoMessage || msgContent.viewOnceMessageV2?.message?.videoMessage) {
-              oldText = '[👁️ Bir dəfəlik baxılan video]';
-            } 
-            // 2. Əgər media deyil fərz ediriksə, normal mətnləri yoxlayırıq
-            else {
-              oldText = msgContent.conversation || 
-                        msgContent.extendedTextMessage?.text || 
-                        '📝 Media və ya Sənəd';
-            }
-
             const timestamp = originalMsg.messageTimestamp;
             const vaxt = timestamp ? new Date(timestamp * 1000).toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' }) : "Bilinmir";
 
             let bildirisMetni = `🕵️‍♂️ *BİR MESAJ SİLİNDİ (AVTO)!* 🕵️‍♂️\n\n` +
                                 `👤 *Göndərən:* @${cleanSender}\n` +
-                                `🕒 *Yazılma vaxtı:* ${vaxt}\n` +
-                                `💬 *Silinən mətn/media:* \n\n> _${oldText}_`;
+                                `🕒 *Yazılma vaxtı:* ${vaxt}\n`;
 
-            await sock.sendMessage(from, {
-              text: bildirisMetni,
-              mentions: [senderId]
-            }, { quoted: originalMsg });
+            // ŞƏKİL, VİDEO və ya BİR DƏFƏLİK media silinib qaçırılarsa:
+            if (msgContent.imageMessage || msgContent.videoMessage || msgContent.stickerMessage || msgContent.audioMessage ||
+                msgContent.viewOnceMessage?.message?.imageMessage || msgContent.viewOnceMessageV2?.message?.imageMessage ||
+                msgContent.viewOnceMessage?.message?.videoMessage || msgContent.viewOnceMessageV2?.message?.videoMessage) {
+              
+              // Başlığı (caption) çıxarırıq
+              const caption = msgContent.imageMessage?.caption || msgContent.videoMessage?.caption || "";
+              bildirisMetni += `💬 *Silinən Media İfşası!* ${caption ? `\n📝 *Alt yazı:* _${caption}_` : ''}`;
+
+              // Medianın özünü WhatsApp serverlərindən dərhal endiririk (keş bitməyibsə)
+              const buffer = await downloadMediaMessage(originalMsg, 'buffer', {}, { 
+                logger: suppressedLogger,
+                reuploadRequest: sock.updateMediaMessage
+              });
+
+              if (buffer) {
+                if (msgContent.imageMessage || msgContent.viewOnceMessage?.message?.imageMessage || msgContent.viewOnceMessageV2?.message?.imageMessage) {
+                  await sock.sendMessage(from, { image: buffer, caption: bildirisMetni, mentions: [senderId] });
+                } else if (msgContent.videoMessage || msgContent.viewOnceMessage?.message?.videoMessage || msgContent.viewOnceMessageV2?.message?.videoMessage) {
+                  await sock.sendMessage(from, { video: buffer, caption: bildirisMetni, mentions: [senderId] });
+                } else if (msgContent.stickerMessage) {
+                  // Əvvəlcə bildiriş mətnini göndərir, dərhal ardınca stikerin özünü atır
+                  await sock.sendMessage(from, { text: bildirisMetni + `💬 *Növü:* ✨ Stiker`, mentions: [senderId] });
+                  await sock.sendMessage(from, { sticker: buffer });
+                } else if (msgContent.audioMessage) {
+                  await sock.sendMessage(from, { text: bildirisMetni + `💬 *Növü:* 🎵 Səs Yazısı`, mentions: [senderId] });
+                  await sock.sendMessage(from, { audio: buffer, mimetype: 'audio/mp4', ptt: msgContent.audioMessage.ptt });
+                }
+                continue; // Medianı göndərdiksə aşağıdakı düz mətn blokuna keçməsin
+              }
+            }
+
+            // Normal düz mətn mesajı silinibsə:
+            let oldText = msgContent.conversation || msgContent.extendedTextMessage?.text;
+            if (!oldText && msgContent.documentMessage) {
+              oldText = `📁 Sənəd/Fayl (Adı: ${msgContent.documentMessage.fileName || 'Bilinmir'})`;
+            }
+
+            if (oldText) {
+              bildirisMetni += `💬 *Silinən mətn:* \n\n> _${oldText}_`;
+              await sock.sendMessage(from, {
+                text: bildirisMetni,
+                mentions: [senderId]
+              }, { quoted: originalMsg });
+            }
           }
         } catch (err) {
-          // Xətaları səssiz keçirik
+          // Xətaları idarə et
         }
       }
     }
