@@ -36,7 +36,7 @@ module.exports = {
         }
       });
       
-      let menu = `*${config.botName} - Commands List*\n`;
+      let menu = `*${config.botName} - Əmrlər siyahısı*\n`;
       menu += `Prefix: *${prefix}*\n\n`;
       
       const orderedCats = Object.keys(categories).sort();
@@ -64,21 +64,21 @@ module.exports = {
             name: 'cta_url',
             buttonParamsJson: JSON.stringify({
               display_text: 'Youtube',
-              url: config.social?.youtube || 'http://youtube.com/@mr_unique_hacker'
+              url: config.social?.youtube || 'http://youtube.com'
             })
           },
           {
             name: 'cta_url',
             buttonParamsJson: JSON.stringify({
               display_text: 'Visit Bot Repo',
-              url: config.social?.github || 'https://github.com/mruniquehacker'
+              url: config.social?.github || 'https://github.com'
             })
           },
           {
             name: 'cta_url',
             buttonParamsJson: JSON.stringify({
               display_text: 'Join Channel',
-              url: 'https://whatsapp.com/channel/0029Va90zAnIHphOuO8Msp3A'
+              url: 'https://whatsapp.com/channel/0029Vb8BQnt9Bb67yuu1r42H'
             })
           }
         ]
