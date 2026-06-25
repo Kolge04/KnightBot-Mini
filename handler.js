@@ -1292,6 +1292,14 @@ const handleAntilink = async (sock, msg, groupMetadata) => {
 };
 
 
+// Öncə link qoruması, ardınca söyüş qoruması işləsin
+const linkIs lended = await handleLinkKoruma(sock, msg, groupMetadata);
+if (linkIsLended) return;
+
+const soyusIsLended = await handleSoyusKoruma(sock, msg, groupMetadata);
+if (soyusIsLended) return;
+
+
 // Anti-group mention handler
 const handleAntigroupmention = async (sock, msg, groupMetadata) => {
   try {
