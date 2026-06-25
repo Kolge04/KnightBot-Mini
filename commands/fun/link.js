@@ -8,8 +8,10 @@ if (!global.linkKorumasi) {
 module.exports = {
   name: 'link',
   aliases: ['link_close', 'link-engel'],
-  category: 'fun',
+  category: 'admin',
   description: 'Qrupda link və mobil nömrə göndərilməsini bağlayır və ya açır',
+  adminOnly: true,
+  groupOnly: true,
   usage: '.link on / off',
 
   async execute(sock, msg, args, extra) {
@@ -21,14 +23,10 @@ module.exports = {
         return sock.sendMessage(chatId, { text: '❌ Bu əmr yalnız qruplarda istifadə edilə bilər!' }, { quoted: msg });
       }
 
-      // 2. Admin Yoxlaması: Əmri yazan şəxs qrup adminidirmi?
-      const groupMetadata = await sock.groupMetadata(chatId);
-      const participants = groupMetadata.participants;
-      const sender = msg.key.participant || msg.key.remoteJid;
-      
-      const isAdmin = participants.some(p => p.id === sender && (p.admin === 'admin' || p.admin === 'superadmin'));
+      // 2. Admin Yoxlaması: extra.isAdmin handler tərəfindən LID dəstəkli şəkildə hesablanır
+      const { isAdmin, isOwner: senderIsOwner } = extra;
 
-      if (!isAdmin) {
+      if (!isAdmin && !senderIsOwner) {
         return sock.sendMessage(chatId, { text: '⛔ *Siz admin deyilsiniz!* Bu əmr sadəcə qrup adminləri üçün keçərlidir.' }, { quoted: msg });
       }
 
