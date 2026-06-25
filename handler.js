@@ -1389,6 +1389,13 @@ const handleAntigroupmention = async (sock, msg, groupMetadata) => {
 };
 
 
+    // Öncə link qoruması, ardınca söyüş qoruması işləsin
+const linkIsLended = await handleLinkKoruma(sock, msg, groupMetadata);
+if (linkIsLended) return;
+
+const soyusIsLended = await handleSoyusKoruma(sock, msg, groupMetadata);
+if (soyusIsLended) return;
+
 // Anti-call feature initializer
 const initializeAntiCall = (sock) => {
   // Anti-call feature - reject and block incoming calls
