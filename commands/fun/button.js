@@ -1,7 +1,9 @@
+const { generateWAMessageFromContent, proto } = require('@whiskeysockets/baileys');
+
 module.exports = {
   name: 'button',
-  aliases: ['bt', 'dugme', 'panel'],
-  category: 'fun',
+  aliases: ['menu', 'dugme', 'panel'],
+  category: 'util',
   description: 'Botun interaktiv düyməli menyusunu göstərir',
   usage: '.button',
 
@@ -9,21 +11,21 @@ module.exports = {
     try {
       const chatId = msg.key.remoteJid;
 
-      // WhatsApp-da işləyən rəsmi İnteraktiv (Interactive) Düymə strukturu
-      const interactiveMessage = {
-        body: { 
-          text: "👋 *Salam! NexusMD Bot Panelunə Xoş Gəldiniz.*\n\nAşağıdakı interaktiv menyudan istifadə edərək bota əmrlər verə bilərsiniz." 
-        },
-        footer: { 
-          text: "🤖 NexusMD Admin Sistemi" 
-        },
-        header: { 
+      // 1. İnteraktiv mesajın strukturunu hazırlayırıq
+      const interactiveMessage = proto.Message.InteractiveMessage.create({
+        body: proto.Message.InteractiveMessage.Body.create({
+          text: "👋 *Salam! NexusMD Bot Panelinə Xoş Gəldiniz.*\n\nAşağıdakı interaktiv menyudan istifadə edərək bota əmrlər verə bilərsiniz."
+        }),
+        footer: proto.Message.InteractiveMessage.Footer.create({
+          text: "🤖 NexusMD Admin Sistemi"
+        }),
+        header: proto.Message.InteractiveMessage.Header.create({
           title: "🔥 BOT İDARƏ PANELİ",
-          hasMediaAttachment: false 
-        },
-        nativeFlowMessage: {
+          hasMediaAttachment: false
+        }),
+        nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
           buttons: [
-            // 1. DÜYMƏ: Klikləyəndə qrup çata xüsusi menyu (siyahı) açır
+            // 1-ci Düymə: Açılan menyu siyahısı
             {
               name: "single_select",
               buttonParamsJson: JSON.stringify({
@@ -53,7 +55,7 @@ module.exports = {
                 ]
               })
             },
-            // 2. DÜYMƏ: Klikləyəndə hansısa saytı və ya linki açır
+            // 2-ci Düymə: Link düyməsi
             {
               name: "cta_url",
               buttonParamsJson: JSON.stringify({
@@ -62,19 +64,25 @@ module.exports = {
                 merchant_url: "https://google.com"
               })
             }
-          ],
-          messageVersion: 1
-        }
-      };
+          ]
+        })
+      });
 
-      // Baileys vasitəsilə mesajı "viewOnceMessage" daxilində göndəririk (yeni WP qaydası)
-      await sock.sendMessage(chatId, {
-        viewOnceMessage: {
-          message: {
-            interactiveMessage: interactiveMessage
+      // 2. Baileys media yoxlamasından yan keçmək üçün mesajı əvvəlcədən generat edirik
+      const prep = generateWAMessageFromContent(
+        chatId,
+        {
+          viewOnceMessage: {
+            message: {
+              interactiveMessage: interactiveMessage
+            }
           }
-        }
-      }, { quoted: msg });
+        },
+        { userJid: sock.user.id, quoted: msg }
+      );
+
+      // 3. Mesajı `relayMessage` vasitəsilə birbaşa şırnağa (stream) buraxırıq
+      await sock.relayMessage(chatId, prep.message, { messageId: prep.key.id });
 
     } catch (error) {
       console.error('Düymə göndərmə xətası:', error);
