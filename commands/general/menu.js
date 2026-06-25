@@ -151,7 +151,7 @@ module.exports = {
       
       menuText += `╰━━━━━━━━━━━━━━━━━\n\n`;
       menuText += `💡 Əlavə məlumat üçün ${config.prefix}help <ƏMR> yazın\n`;
-      menuText += `🌟 Bot Versiyası: 1.0.0\n`;
+      menuText += `🌟 Bot Versiyası: ${config.VERSION}\n`;
       
       // Send menu with image
       const fs = require('fs');
