@@ -18,17 +18,11 @@ module.exports = {
 
       const randomIndex = Math.floor(Math.random() * sozlerBazasi.length);
       const secilenSoz = sozlerBazasi[randomIndex];
-
-      // Sətrin daxilini avtomatik dolduran təmiz wa.me linki
-      const butonKimiLink = `https://wa.me/${sock.user.id.split(':')[0]}?text=.soz`;
-
       // Mesajı WhatsApp-ın başa düşəcəyi təmiz formata salırıq (Markdown mötərizələrini təmizlədik)
       let mesajMetni = `📝 *GÜNÜN SÖZÜ:* \n\n` +
                         `> _${secilenSoz}_\n\n` +
-                        `⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n\n` +
-                       
-                        `👉 ${butonKimiLink}`;
-
+                        `⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n\n`;
+                      
       // Mesajı göndəririk (linkPreview-nu ləğv etdik ki, altda lazımsız böyük qutu çıxıb görüntünü pozmasın)
       await sock.sendMessage(chatId, { 
         text: mesajMetni
