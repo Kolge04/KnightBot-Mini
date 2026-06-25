@@ -12,3 +12,18 @@ const sozlerBazasi = [
 ];
 
 module.exports = sozlerBazasi;
+
+
+
+
+// commands/soyus_cavab.js
+
+const soyusCavablari = [
+  "🤬 *Tərbiyəsizlik eləmə! Yazdığın söyüş sistem tərəfindən silindi.*",
+  "⚠️ *Zəhmət olmasa qrup daxilində etik qaydalara riayət edin!*",
+  "🤫 *Şşş! Ağzını təmiz saxla, yoxsa qrupdan uçacaqsan.*",
+  "🚫 *Bu qrupda söyüş söymək qəti qadağandır!*",
+  "🛑 *Mədəni ol qardaşım, bura söyüş yeri deyil.*"
+];
+
+module.exports = soyusCavablari;
