@@ -8,7 +8,7 @@ if (!global.linkKorumasi) {
 module.exports = {
   name: 'link',
   aliases: ['link_close', 'link-engel'],
-  category: 'admin',
+  category: 'fun',
   description: 'Qrupda link və mobil nömrə göndərilməsini bağlayır və ya açır',
   adminOnly: true,
   groupOnly: true,
