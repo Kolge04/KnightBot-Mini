@@ -25,6 +25,9 @@ module.exports = {
     GAME_TAIM: 25,  // SANIYENI BURA YAZ (25000 = 25 SANIYE)
     GAME_NEXT: 4,  // Oyun Sonlanma ucun saygac
 
+    // VERSION
+    VERSION: '1.0.1',
+
 
     // SHAZAM 
     ACR_HOST: 'identify-ap-southeast-1.acrcloud.com',
