@@ -77,7 +77,7 @@ module.exports = {
       // Yekun nəticəni yazırıq
       let sonMetn = `📊 *MALLIQ ÖLÇMƏ NƏTİCƏSİ* 📊\n\n` +
                     `👤 *Hədəf:* @${cleanTarget}\n` +
-                    `📈 *Mallıq Səviyyəsi:* \`%${randomPercent}\`\n\n` +
+                    `📈 *Mallıq Səviyyəsi:* \`${randomPercent}%\`\n\n` +
                     `📝 *Sistem şərhi:* _${şərh}_`;
 
       await sock.sendMessage(chatId, {
