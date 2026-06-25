@@ -4,7 +4,7 @@ const handleSoyusKoruma = async (sock, msg, groupMetadata) => {
     const chatId = msg.key.remoteJid;
     if (!chatId || !chatId.endsWith('@g.us')) return false; // Yalnız qruplarda işləsin
 
-    const soyusCavablari = require('./soyus_cavab'); // Cavab bazasını çəkirik
+    const soyusCavablari = require('../../word'); // Cavab bazasını çəkirik
 
     const mesajMetni = (
       msg.message?.conversation ||
