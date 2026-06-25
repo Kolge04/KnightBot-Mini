@@ -1,5 +1,5 @@
 // commands/soz.js
-const sozlerBazasi = require('../../wortds'); // Eyni qovluqdakı wortds.js faylından oxuyur
+const sozlerBazasi = require('../../word'); // Eyni qovluqdakı wortds.js faylından oxuyur
 
 module.exports = {
   name: 'soz',
