@@ -1244,60 +1244,7 @@ const handleAntilink = async (sock, msg, groupMetadata) => {
                   msg.message?.imageMessage?.caption || 
                   msg.message?.videoMessage?.caption || '';
     
-    // Comprehensive link detection - matches links with or without protocols
-    // Matches: https://t.me/..., http://wa.me/..., t.me/..., wa.me/..., google.com, telegram.com, etc.
-    // Pattern breakdown:
-    // 1. (https?:\/\/)? - Optional http:// or https://
-    // 2. ([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,} - Domain pattern (e.g., google.com, t.me)
-    // 3. (\/[^\s]*)? - Optional path after domain
-    const linkPattern = /(https?:\/\/)?([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}(\/[^\s]*)?/i;
     
-    // Check for any links (with or without protocol)
-    if (linkPattern.test(body)) {
-              const senderIsAdmin = await isAdmin(sock, sender, from, groupMetadata);
-      const senderIsOwner = isOwner(sender);
-      
-      if (senderIsAdmin || senderIsOwner) return;
-      
-      const botIsAdmin = await isBotAdmin(sock, from, groupMetadata);
-      const action = (groupSettings.antilinkAction || 'delete').toLowerCase();
-      
-      if (action === 'kick' && botIsAdmin) {
-        try {
-          await sock.sendMessage(from, { delete: msg.key });
-          await sock.groupParticipantsUpdate(from, [sender], 'remove');
-          await sock.sendMessage(from, { 
-            text: `🔗 Anti-link triggered. Link removed.`,
-            mentions: [sender]
-          }, { quoted: msg });
-        } catch (e) {
-          console.error('Failed to kick for antilink:', e);
-        }
-      } else {
-        // Default: delete message
-        try {
-          await sock.sendMessage(from, { delete: msg.key });
-          await sock.sendMessage(from, { 
-            text: `🔗 Anti-link triggered. Link removed.`,
-            mentions: [sender]
-          }, { quoted: msg });
-        } catch (e) {
-          console.error('Failed to delete message for antilink:', e);
-        }
-      }
-    }
-  } catch (error) {
-    console.error('Error in antilink handler:', error);
-  }
-};
-
-
-// Öncə link qoruması, ardınca söyüş qoruması işləsin
-const linkIsLended = await handleLinkKoruma(sock, msg, groupMetadata);
-if (linkIsLended) return;
-
-const soyusIsLended = await handleSoyusKoruma(sock, msg, groupMetadata);
-if (soyusIsLended) return;
 
 // Anti-group mention handler
 const handleAntigroupmention = async (sock, msg, groupMetadata) => {
