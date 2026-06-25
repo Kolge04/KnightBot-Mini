@@ -193,9 +193,47 @@ const getLidMappingValue = (user, direction) => {
 
 
 
+// 🚨 QRUP MESAJLARINI YOXLAYAN LİNK/NÖMRƏ SİLİCİ MODUL (MÜSTƏQİL VERSİYA)
+const mChatId = msg?.key?.remoteJid || "";
 
-// Link/nömrə qoruması: handleLinkKoruma() funksiyası olaraq aşağıda təyin edilib
-// və handleMessage() daxilindən çağırılır
+if (mChatId && global.linkKorumasi && global.linkKorumasi.includes(mChatId)) {
+  const mesajMetni = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
+
+  // Regex: Linkləri və Azərbaycan nömrələrini tutur
+  const linkRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|\b[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b)/gi;
+  const nomreRegex = /(\+994|0)(10|50|51|55|70|77|99)\d{7}/g;
+
+  if (linkRegex.test(mesajMetni) || nomreRegex.test(mesajMetni)) {
+    (async () => {
+      try {
+        const groupMetadata = await sock.groupMetadata(mChatId);
+        const sender = msg.key.participant || msg.key.remoteJid;
+        const isAdmin = groupMetadata.participants.some(p => p.id === sender && (p.admin === 'admin' || p.admin === 'superadmin'));
+
+        if (!isAdmin) {
+          // 1. Mesajı qrupdan silirik
+          await sock.sendMessage(mChatId, { delete: msg.key });
+
+          // 2. Qrupa xəbərdarlıq göndəririk
+          const silinmeMetni = linkRegex.test(mesajMetni) 
+            ? `🗑️ *Qrupa Göndərilən Linki Sildim*\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n❌ *Bu qrupa hər hansısa link göndərməyə icazə yoxdur!*`
+            : `🗑️ *Qrupa Göndərilən Mobil Nömrəni Sildim*\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n❌ *Bu qrupa hər hansısa mobil nömrə göndərməyə icazə yoxdur!*`;
+
+          await sock.sendMessage(mChatId, { text: silinmeMetni });
+        }
+      } catch (err) {
+        console.error("Link qoruması daxili xəta:", err);
+      }
+    })();
+    
+    return; // Digər əmrlərin işləməməsi üçün buradaca dayandırırıq
+  }
+}
+
+
+
+
+
 
 
 // Normalize JID handling LID conversion
@@ -475,13 +513,7 @@ const handleMessage = async (sock, msg) => {
     if (isGroup) {
       addMessage(from, sender);
     }
-
-    // 🔗 Link / Nömrə qoruması (yalnız adminlər keçə bilər)
-    if (isGroup) {
-      const handled = await handleLinkKoruma(sock, msg, groupMetadata);
-      if (handled) return;
-    }
-
+    
     // Return early for non-group messages with no recognizable content
     if (!content || actualMessageTypes.length === 0) return;
     
@@ -1198,53 +1230,6 @@ const handleGroupUpdate = async (sock, update) => {
   }
 };
 
-
-// 🔗 Link / Nömrə qoruması - yalnız adminlər göndərə bilər
-const handleLinkKoruma = async (sock, msg, groupMetadata) => {
-  try {
-    const chatId = msg.key.remoteJid;
-    if (!chatId || !chatId.endsWith('@g.us')) return false;
-    if (!global.linkKorumasi || !global.linkKorumasi.includes(chatId)) return false;
-
-    const mesajMetni =
-      msg.message?.conversation ||
-      msg.message?.extendedTextMessage?.text ||
-      msg.message?.imageMessage?.caption ||
-      msg.message?.videoMessage?.caption || '';
-
-    const linkRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|\b[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b)/gi;
-    const nomreRegex = /(\+994|0)(10|50|51|55|70|77|99)\d{7}/g;
-
-    const hasLink   = linkRegex.test(mesajMetni);
-    // Reset lastIndex after test()
-    linkRegex.lastIndex = 0;
-    const hasNomre  = nomreRegex.test(mesajMetni);
-
-    if (!hasLink && !hasNomre) return false;
-
-    const sender = msg.key.participant || msg.key.remoteJid;
-
-    // Admin + owner yoxlaması (LID dəstəkli)
-    const senderIsAdmin = await isAdmin(sock, sender, chatId, groupMetadata);
-    const senderIsOwner = isOwner(sender);
-    if (senderIsAdmin || senderIsOwner) return false;
-
-    // Mesajı sil
-    await sock.sendMessage(chatId, { delete: msg.key });
-
-    // Xəbərdarlıq göndər
-    const silinmeMetni = hasLink
-      ? `🗑️ *Qrupa Göndərilən Linki Sildim*\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n❌ *Bu qrupa hər hansısa link göndərməyə icazə yoxdur!*`
-      : `🗑️ *Qrupa Göndərilən Mobil Nömrəni Sildim*\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n❌ *Bu qrupa hər hansısa mobil nömrə göndərməyə icazə yoxdur!*`;
-
-    await sock.sendMessage(chatId, { text: silinmeMetni });
-    return true; // mesaj işləndi, daha irəli getmə
-  } catch (err) {
-    console.error('Link qoruması xətası:', err);
-    return false;
-  }
-};
-
 // Antilink handler
 const handleAntilink = async (sock, msg, groupMetadata) => {
   try {
@@ -1450,170 +1435,6 @@ const handleAntigroupmention = async (sock, msg, groupMetadata) => {
 };
 
 
-// =========================================================================
-// 🕵️‍♂️ AVTO BƏRPA - Silinən mesajları (mətn, şəkil, video, stiker, səs) bərpa edir
-// Hər qrup üçün ayrı-ayrı .avto on / .avto off ilə idarə olunur (yalnız adminlər)
-// =========================================================================
-const handleAvtoBerpa = (sock, store) => {
-  const { downloadMediaMessage } = require('@whiskeysockets/baileys');
-
-  // Suppressed logger - media endirmə zamanı log spam qarşısını alır
-  const suppressedLogger = {
-    info: () => {},
-    warn: () => {},
-    error: () => {},
-    debug: () => {},
-    trace: () => {},
-    child: () => suppressedLogger,
-  };
-
-  sock.ev.on('messages.update', async (updates) => {
-    for (const update of updates) {
-      const isDeleted =
-        update.update.message === null ||
-        update.update.clearMediaKey ||
-        update.update.message?.protocolMessage?.type === 0 ||
-        update.update.message?.protocolMessage?.type === 'REVOKE';
-
-      if (!isDeleted) continue;
-
-      try {
-        const from = update.key.remoteJid;
-
-        // Yalnız qruplar işlənir; broadcast/status/newsletter istisna edilir
-        if (
-          !from ||
-          !from.endsWith('@g.us') ||
-          from.includes('@broadcast') ||
-          from.includes('status.broadcast') ||
-          from.includes('@newsletter')
-        ) continue;
-
-        // Bu qrup üçün avtoberpa aktiv deyilsə keç
-        const groupSettings = database.getGroupSettings(from);
-        if (!groupSettings.avtoberpa) continue;
-
-        const senderId = update.key.participant || update.key.remoteJid;
-        const cleanSender = senderId.split('@')[0].split(':')[0];
-
-        // Botun özü tərəfindən silinənlər göstərilməsin
-        if (senderId.includes(sock.user.id.split(':')[0])) continue;
-
-        const originalMsg = await store.loadMessage(from, update.key.id);
-        if (!originalMsg || !originalMsg.message) continue;
-
-        const msgContent =
-          originalMsg.message.ephemeralMessage?.message || originalMsg.message;
-
-        const timestamp = originalMsg.messageTimestamp;
-        const vaxt = timestamp
-          ? new Date(timestamp * 1000).toLocaleTimeString('az-AZ', {
-              hour: '2-digit',
-              minute: '2-digit',
-            })
-          : 'Bilinmir';
-
-        let bildirisMetni =
-          `🕵️‍♂️ *BİR MESAJ SİLİNDİ (AVTO)!* 🕵️‍♂️\n\n` +
-          `👤 *Göndərən:* @${cleanSender}\n` +
-          `🕒 *Yazılma vaxtı:* ${vaxt}\n`;
-
-        // Media mesajı (şəkil, video, stiker, səs, bir dəfəlik media)
-        const hasMedia =
-          msgContent.imageMessage ||
-          msgContent.videoMessage ||
-          msgContent.stickerMessage ||
-          msgContent.audioMessage ||
-          msgContent.viewOnceMessage?.message?.imageMessage ||
-          msgContent.viewOnceMessageV2?.message?.imageMessage ||
-          msgContent.viewOnceMessage?.message?.videoMessage ||
-          msgContent.viewOnceMessageV2?.message?.videoMessage;
-
-        if (hasMedia) {
-          const caption =
-            msgContent.imageMessage?.caption ||
-            msgContent.videoMessage?.caption ||
-            '';
-          bildirisMetni += `💬 *Silinən Media İfşası!*${
-            caption ? `\n📝 *Alt yazı:* _${caption}_` : ''
-          }`;
-
-          const buffer = await downloadMediaMessage(
-            originalMsg,
-            'buffer',
-            {},
-            {
-              logger: suppressedLogger,
-              reuploadRequest: sock.updateMediaMessage,
-            }
-          );
-
-          if (buffer) {
-            if (
-              msgContent.imageMessage ||
-              msgContent.viewOnceMessage?.message?.imageMessage ||
-              msgContent.viewOnceMessageV2?.message?.imageMessage
-            ) {
-              await sock.sendMessage(from, {
-                image: buffer,
-                caption: bildirisMetni,
-                mentions: [senderId],
-              });
-            } else if (
-              msgContent.videoMessage ||
-              msgContent.viewOnceMessage?.message?.videoMessage ||
-              msgContent.viewOnceMessageV2?.message?.videoMessage
-            ) {
-              await sock.sendMessage(from, {
-                video: buffer,
-                caption: bildirisMetni,
-                mentions: [senderId],
-              });
-            } else if (msgContent.stickerMessage) {
-              await sock.sendMessage(from, {
-                text: bildirisMetni + `💬 *Növü:* ✨ Stiker`,
-                mentions: [senderId],
-              });
-              await sock.sendMessage(from, { sticker: buffer });
-            } else if (msgContent.audioMessage) {
-              await sock.sendMessage(from, {
-                text: bildirisMetni + `💬 *Növü:* 🎵 Səs Yazısı`,
-                mentions: [senderId],
-              });
-              await sock.sendMessage(from, {
-                audio: buffer,
-                mimetype: 'audio/mp4',
-                ptt: msgContent.audioMessage.ptt,
-              });
-            }
-            continue; // Media göndərilibsə mətn blokuna keçmə
-          }
-        }
-
-        // Mətn və ya sənəd silinibsə
-        let oldText =
-          msgContent.conversation || msgContent.extendedTextMessage?.text;
-        if (!oldText && msgContent.documentMessage) {
-          oldText = `📁 Sənəd/Fayl (Adı: ${
-            msgContent.documentMessage.fileName || 'Bilinmir'
-          })`;
-        }
-
-        if (oldText) {
-          bildirisMetni += `💬 *Silinən mətn:* \n\n> _${oldText}_`;
-          await sock.sendMessage(
-            from,
-            { text: bildirisMetni, mentions: [senderId] },
-            { quoted: originalMsg }
-          );
-        }
-      } catch (err) {
-        // Xətaları idarə et - log spam qarşısını almaq üçün susduruluğ
-      }
-    }
-  });
-};
-
 // Anti-call feature initializer
 const initializeAntiCall = (sock) => {
   // Anti-call feature - reject and block incoming calls
@@ -1649,10 +1470,8 @@ module.exports = {
   handleMessage,
   handleGroupUpdate,
   handleAntilink,
-  handleLinkKoruma,
   handleAntigroupmention,
   initializeAntiCall,
-  handleAvtoBerpa,
   isOwner,
   isAdmin,
   isBotAdmin,
