@@ -20,8 +20,8 @@ module.exports = {
       const secilenSoz = sozlerBazasi[randomIndex];
       // Mesajı WhatsApp-ın başa düşəcəyi təmiz formata salırıq (Markdown mötərizələrini təmizlədik)
       let mesajMetni = `📝 *GÜNÜN SÖZÜ:* \n\n` +
-                        `> _${secilenSoz}_\n\n` +
-                        `⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n\n`;
+                        `> _${secilenSoz}_\n\n`;
+              
                       
       // Mesajı göndəririk (linkPreview-nu ləğv etdik ki, altda lazımsız böyük qutu çıxıb görüntünü pozmasın)
       await sock.sendMessage(chatId, { 
