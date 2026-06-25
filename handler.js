@@ -193,42 +193,47 @@ const getLidMappingValue = (user, direction) => {
 
 
 
+// 🚨 QRUP MESAJLARINI YOXLAYAN LİNK/NÖMRƏ SİLİCİ MODUL (MÜSTƏQİL VERSİYA)
+const mChatId = msg?.key?.remoteJid || "";
 
-// 🚨 QRUP MESAJLARINI YOXLAYAN LİNK/NÖMRƏ SİLİCİ MODUL (TƏHLÜKƏSİZ ASYNC VERSİYA)
-if (global.linkKorumasi && global.linkKorumasi.includes(chatId)) {
+if (mChatId && global.linkKorumasi && global.linkKorumasi.includes(mChatId)) {
   const mesajMetni = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
 
-  // Regex strukturları: Bütün linkləri və Azərbaycan nömrə formatlarını avtomatik tutur
+  // Regex: Linkləri və Azərbaycan nömrələrini tutur
   const linkRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|\b[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b)/gi;
   const nomreRegex = /(\+994|0)(10|50|51|55|70|77|99)\d{7}/g;
 
   if (linkRegex.test(mesajMetni) || nomreRegex.test(mesajMetni)) {
-    // Ana funksiyanı async etmədən xətanın qarşısını almaq üçün daxili async mühit yaradırıq
     (async () => {
       try {
-        const groupMetadata = await sock.groupMetadata(chatId);
+        const groupMetadata = await sock.groupMetadata(mChatId);
         const sender = msg.key.participant || msg.key.remoteJid;
         const isAdmin = groupMetadata.participants.some(p => p.id === sender && (p.admin === 'admin' || p.admin === 'superadmin'));
 
         if (!isAdmin) {
           // 1. Mesajı qrupdan silirik
-          await sock.sendMessage(chatId, { delete: msg.key });
+          await sock.sendMessage(mChatId, { delete: msg.key });
 
           // 2. Qrupa xəbərdarlıq göndəririk
           const silinmeMetni = linkRegex.test(mesajMetni) 
             ? `🗑️ *Qrupa Göndərilən Linki Sildim*\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n❌ *Bu qrupa hər hansısa link göndərməyə icazə yoxdur!*`
             : `🗑️ *Qrupa Göndərilən Mobil Nömrəni Sildim*\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n❌ *Bu qrupa hər hansısa mobil nömrə göndərməyə icazə yoxdur!*`;
 
-          await sock.sendMessage(chatId, { text: silinmeMetni });
+          await sock.sendMessage(mChatId, { text: silinmeMetni });
         }
       } catch (err) {
         console.error("Link qoruması daxili xəta:", err);
       }
     })();
     
-    return; // Ana handler-in aşağı sətirlərə düşməsinin dərhal qarşısını alırıq
+    return; // Digər əmrlərin işləməməsi üçün buradaca dayandırırıq
   }
 }
+
+
+
+
+
 
 
 // Normalize JID handling LID conversion
