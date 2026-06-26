@@ -1248,9 +1248,6 @@ const handleLinkKoruma = async (sock, msg, groupMetadata) => {
 
 
 
-// Digər qorumalardan dərhal sonra salamlaşmanı yoxla
-const salamIsHandled = await handleSalamlasma(sock, meke); // meke və ya msg (səndə hansıdırsa)
-if (salamIsHandled) return;
 
 // Antilink handler
 const handleAntilink = async (sock, msg, groupMetadata) => {
