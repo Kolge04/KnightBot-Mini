@@ -8,7 +8,7 @@ const path = require('path');
 const { downloadMediaMessage } = require('@whiskeysockets/baileys');
 
 module.exports = {
-  name: 'setmenuimage',
+  name: 'setmenu',
   aliases: ['setmenuimg', 'changemenuimage'],
   category: 'owner',
   description: 'Set or change the menu image (owner only)',
@@ -32,7 +32,7 @@ module.exports = {
       const imageMsg = quotedMsg.imageMessage || quotedMsg.stickerMessage;
       
       if (!imageMsg) {
-        return extra.reply('❌ The replied message must be an *image* or *sticker*.');
+        return extra.reply('❌ Cavab verilən mesaj *şəkil* və ya *stiker* olmalıdır.');
       }
       
       // Download the media
@@ -86,7 +86,7 @@ module.exports = {
       // Write new image
       fs.writeFileSync(imagePath, finalBuffer);
       
-      await extra.reply('✅ Menu image has been updated successfully!');
+      await extra.reply('✅ Menyu şəkli uğurla yeniləndi!');
       
     } catch (error) {
       console.error('SetMenuImage command error:', error);
