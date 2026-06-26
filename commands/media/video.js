@@ -57,7 +57,7 @@ module.exports = {
         if (thumb) {
           await sock.sendMessage(chatId, {
             image: { url: thumb },
-            caption: `*${captionTitle}*\n\nYükənir...`
+            caption: `*${captionTitle}*\n\n📥 Yükənir...`
           }, { quoted: msg });
         }
       } catch (e) {
