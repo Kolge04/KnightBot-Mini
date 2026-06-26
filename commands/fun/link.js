@@ -20,14 +20,14 @@ module.exports = {
 
       // 1. Qrup yoxlaması (Şəxsi çatda bu əmr işləməməlidir)
       if (!chatId.endsWith('@g.us')) {
-        return sock.sendMessage(chatId, { text: '❌ Bu əmr yalnız qruplarda istifadə edilə bilər!' }, { quoted: msg });
+        return sock.sendMessage(chatId, { text: config.groupOnly }, { quoted: msg });
       }
 
       // 2. Admin Yoxlaması: extra.isAdmin handler tərəfindən LID dəstəkli şəkildə hesablanır
       const { isAdmin, isOwner: senderIsOwner } = extra;
 
       if (!isAdmin && !senderIsOwner) {
-        return sock.sendMessage(chatId, { text: '⛔ *Siz admin deyilsiniz!* Bu əmr sadəcə qrup adminləri üçün keçərlidir.' }, { quoted: msg });
+        return sock.sendMessage(chatId, { text: config.adminOnly }, { quoted: msg });
       }
 
       const emr = args[0]?.toLowerCase();
