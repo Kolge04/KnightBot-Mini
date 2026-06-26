@@ -1247,6 +1247,11 @@ const handleLinkKoruma = async (sock, msg, groupMetadata) => {
 
 
 
+const salamIsHandled = await handleSalamlasma(sock, msg);
+    if (salamIsHandled) return;
+
+
+
 
 
 // Antilink handler
