@@ -1,4 +1,6 @@
 // commands/fun/ship.js
+
+const config = require('../../config');
 module.exports = {
   name: 'ship',
   aliases: ['shipit','match'],
@@ -39,10 +41,10 @@ module.exports = {
             a = shuffled[0];
             b = shuffled[1];
           } else {
-            return extra.reply('❌ Not enough members to ship!');
+            return extra.reply('❌ Göndərmək üçün kifayət qədər üzv yoxdur!');
           }
         } else {
-          return extra.reply('❌ This command works only in groups!');
+          return extra.reply(config.groupOnly);
         }
       }
 
@@ -57,9 +59,9 @@ module.exports = {
       const hearts = ['💖','💕','💘','💞','💓'];
       const heart = hearts[Math.floor(Math.random() * hearts.length)];
       const phrases = [
-        `${nameOf(a)} + ${nameOf(b)} = ${love}% ${heart}\nLooks promising!`,
-        `${nameOf(a)} x ${nameOf(b)} = ${love}%\nNot bad, keep flirting 😉`,
-        `${nameOf(a)} & ${nameOf(b)} Compatibility: ${love}%\n${love > 75 ? 'A strong match ❤️' : love > 40 ? 'Could work 🤝' : 'Mostly chaos 😂'}`
+        `${nameOf(a)} + ${nameOf(b)} = ${love}% ${heart}\nPerspektivli görünür!`,
+        `${nameOf(a)} x ${nameOf(b)} = ${love}%\nPis deyil, flört etməyə davam et 😉`,
+        `${nameOf(a)} & ${nameOf(b)} Compatibility: ${love}%\n${love > 75 ? 'Güclü matç ❤️' : love > 40 ? 'İşləyə bilərdi 🤝' : 'Əsasən xaos 😂'}`
       ];
 
       const out = phrases[Math.floor(Math.random() * phrases.length)];
@@ -67,7 +69,7 @@ module.exports = {
       await sock.sendMessage(extra.from, { text: out, mentions: [a, b] }, { quoted: msg });
     } catch (error) {
       console.error('[ship] ERROR:', error);
-      await extra.reply('❌ Something went wrong while shipping.');
+      await extra.reply('❌ Xəta.');
     }
   }
 };
