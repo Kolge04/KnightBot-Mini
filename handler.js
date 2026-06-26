@@ -807,10 +807,7 @@ const handleMessage = async (sock, msg) => {
     // Get command
     let command = commands.get(commandName);
     
-    // Unpin əmri yazılıbsa, onu pin faylına yönləndir
-    if (!command && commandName === 'unpin') {
-      command = commands.get('pin');
-    }
+    
     
     if (!command) return;
     
