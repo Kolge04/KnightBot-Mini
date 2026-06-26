@@ -3,7 +3,7 @@
  */
 
 module.exports = {
-    name: 'tagall',
+    name: 'all',
     aliases: ['mentionall', 'everyone'],
     category: 'admin',
     description: 'Tag all group members',
@@ -14,13 +14,13 @@ module.exports = {
     
     async execute(sock, msg, args, extra) {
       try {
-        const message = args.join(' ') || 'Everyone!';
+        const message = args.join(' ') || 'Hər kəs!';
         
         const participants = extra.groupMetadata.participants.map(p => p.id);
         
-        let text = `📢 *GROUP ANNOUNCEMENT*\n\n`;
+        let text = `📢 *QRUP ELANI*\n\n`;
         text += `${message}\n\n`;
-        text += `👥 Tagged Members:\n`;
+        text += `👥 Tagged Üzvlər:\n`;
         
         participants.forEach((participant, index) => {
           text += `${index + 1}. @${participant.split('@')[0]}\n`;
