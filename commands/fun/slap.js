@@ -70,7 +70,7 @@ module.exports = {
       // ŞƏRT 1: Əgər sadəcə .slap yazılıbsa (hədəf yoxdursa)
       else {
         await sock.sendMessage(from, {
-          text: `🤖 *Bot*, ${senderTag}${randomSlap}`,
+          text: `${config.botName}, ${senderTag}${randomSlap}`,
           mentions: [senderJid]
         }, { quoted: msg });
       }
