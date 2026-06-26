@@ -805,7 +805,13 @@ const handleMessage = async (sock, msg) => {
     const commandName = args.shift().toLowerCase();
     
     // Get command
-    const command = commands.get(commandName);
+    let command = commands.get(commandName);
+    
+    // Unpin əmri yazılıbsa, onu pin faylına yönləndir
+    if (!command && commandName === 'unpin') {
+      command = commands.get('pin');
+    }
+    
     if (!command) return;
     
     // Check self mode (private mode) - only owner can use commands
