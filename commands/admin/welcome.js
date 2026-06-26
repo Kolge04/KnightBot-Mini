@@ -20,9 +20,9 @@ module.exports = {
       
       if (!action || !['on', 'off'].includes(action)) {
         const groupSettings = db.getGroupSettings(groupId);
-        const status = groupSettings.welcome ? '✅ Enabled' : '❌ Disabled';
+        const status = groupSettings.welcome ? '✅ Aktivdir' : '❌ Bağlıdır';
         return await sock.sendMessage(groupId, {
-          text: `👋 *Welcome Messages*\n\nStatus: ${status}\nMessage: ${groupSettings.welcomeMessage}\n\nUsage: .welcome on/off\n\nTo customize: .setwelcome <message>`
+          text: `👋 *Xoş gəlmisiniz Mesajları*\n\nStatus: ${status}\nMessage: ${groupSettings.welcomeMessage}\n\nİstifadə: .welcome on/off\n\nFərdiləşdirmək üçün: .setwelcome <message>`
         }, { quoted: msg });
       }
       
@@ -30,13 +30,13 @@ module.exports = {
       db.updateGroupSettings(groupId, { welcome: enable });
       
       await sock.sendMessage(groupId, {
-        text: `✅ Welcome messages ${enable ? 'enabled' : 'disabled'}!${enable ? '\n\nNew members will now receive welcome messages.' : ''}`
+        text: `✅ Salamlama mesajları ${enable ? 'aktivləşdirildi' : 'Bağlıdır'}!${enable ? '\n\nYeni üzvlər indi salamlama mesajları alacaqlar.' : ''}`
       }, { quoted: msg });
       
     } catch (error) {
       console.error('Welcome Error:', error);
       await sock.sendMessage(msg.key.remoteJid, {
-        text: `❌ Error: ${error.message}`
+        text: `❌ Xəta: ${error.message}`
       }, { quoted: msg });
     }
   }
