@@ -14,7 +14,7 @@ module.exports = {
   async execute(sock, msg, args, extra) {
     try {
       if (args.length === 0) {
-        return extra.reply('❌ Usage: .ai <question>\n\nExample: .ai What is the capital of France?');
+        return extra.reply('❌ İstifadə qaydası: .ai <sual>\n\nNümunə: .ai Fransanın paytaxtı hansı şəhərdir?');
       }
       
       const question = args.join(' ');
@@ -26,7 +26,7 @@ module.exports = {
       await extra.reply(answer);
       
     } catch (error) {
-      await extra.reply(`❌ AI Error: ${error.message}`);
+      await extra.reply(`❌ Xəta: ${error.message}`);
     }
   }
 };
