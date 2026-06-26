@@ -44,7 +44,7 @@ module.exports = {
             return extra.reply('❌ Göndərmək üçün kifayət qədər üzv yoxdur!');
           }
         } else {
-          return extra.reply(`${config.groupOnly}`);
+          return extra.reply(`❌ Yanlız qruplar üçün keçərlidir.`);
         }
       }
 
