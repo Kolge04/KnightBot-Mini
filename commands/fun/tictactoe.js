@@ -9,8 +9,8 @@ const games = {};
 
 module.exports = {
   games, // Export for handler access
-  name: 'tictactoe',
-  aliases: ['ttt', 'xo'],
+  name: 'xo',
+  aliases: ['tt', 'tictactoe'],
   category: 'fun',
   description: 'Play TicTacToe with another player - Type .ttt to start or join a game',
   usage: '.ttt [room name]',
@@ -28,7 +28,7 @@ module.exports = {
       );
       
       if (existingRoom && existingRoom.state === 'PLAYING') {
-        await extra.reply('❌ You are still in a game. Type *surrender* to quit.');
+        await extra.reply('❌ Siz hələ də oyundasınız. Çıxmaq üçün *surrender* yazın.');
         return;
       }
       
@@ -60,7 +60,7 @@ module.exports = {
         }[v]));
         
         const str = `
-🎮 *TicTacToe Game Started!*
+🎮 *TicTacToe Oyunu Başladı!*
 
 Waiting for @${room.game.currentTurn.split('@')[0]} to play...
 
@@ -68,11 +68,11 @@ ${arr.slice(0, 3).join('')}
 ${arr.slice(3, 6).join('')}
 ${arr.slice(6).join('')}
 
-▢ *Room ID:* ${room.id}
-▢ *Rules:*
-• Make 3 rows of symbols vertically, horizontally or diagonally to win
-• Type a number (1-9) to place your symbol
-• Type *surrender* to give up
+▢ *Otaq ID:* ${room.id}
+▢ *Qaydalar:*
+• Qazanmaq üçün şaquli, üfüqi və ya diaqonal olaraq 3 sıra simvol hazırlayın
+• Simvolunuzu yerləşdirmək üçün rəqəm (1-9) yazın
+• Təslim olmaq üçün *surrender* yazın
 `;
         
         await sock.sendMessage(from, { 
@@ -93,15 +93,15 @@ ${arr.slice(6).join('')}
         if (text) room.name = text;
         
         await sock.sendMessage(from, { 
-          text: `⏳ *Waiting for opponent*\nType *.ttt ${text || ''}* to join!`
+          text: `⏳ *Rəqib gözlənilir*\nType *.tt ${text || ''}* Qoşul!`
         });
         
         games[room.id] = room;
       }
       
     } catch (error) {
-      console.error('Error in tictactoe command:', error);
-      await extra.reply('❌ Error starting game. Please try again.');
+      console.error('Tictactoe əmrində xəta:', error);
+      await extra.reply('❌ Oyuna başlama xətası. Yenidən cəhd edin.');
     }
   },
 };
@@ -131,7 +131,7 @@ async function handleTicTacToeMove(sock, msg, extra) {
     // Allow surrender at any time, not just during player's turn
     if (sender !== room.game.currentTurn && !isSurrender) {
       await sock.sendMessage(from, { 
-        text: '❌ Not your turn!' 
+        text: '❌ Sənin növbən deyil!' 
       });
       return true;
     }
@@ -143,7 +143,7 @@ async function handleTicTacToeMove(sock, msg, extra) {
     
     if (!ok) {
       await sock.sendMessage(from, { 
-        text: '❌ Invalid move! That position is already taken.' 
+        text: '❌ IYanlış gediş! Həmin mövqe artıq tutulub..' 
       });
       return true;
     }
@@ -171,7 +171,7 @@ async function handleTicTacToeMove(sock, msg, extra) {
       
       // Send a surrender message
       await sock.sendMessage(from, { 
-        text: `🏳️ @${sender.split('@')[0]} has surrendered! @${winner.split('@')[0]} wins the game!`,
+        text: `🏳️ @${sender.split('@')[0]} təslim olmuşdur! @${winner.split('@')[0]} oyunu qazanır!`,
         mentions: [sender, winner]
       });
       
@@ -182,11 +182,11 @@ async function handleTicTacToeMove(sock, msg, extra) {
     
     let gameStatus;
     if (winner) {
-      gameStatus = `🎉 @${winner.split('@')[0]} wins the game!`;
+      gameStatus = `🎉 @${winner.split('@')[0]} oyunu qazanır!`;
     } else if (isTie) {
-      gameStatus = `🤝 Game ended in a draw!`;
+      gameStatus = `🤝 Oyun heç-heçə başa çatıb!`;
     } else {
-      gameStatus = `🎲 Turn: @${room.game.currentTurn.split('@')[0]} (${sender === room.game.playerX ? '❎' : '⭕'})`;
+      gameStatus = `🎲 Dön: @${room.game.currentTurn.split('@')[0]} (${sender === room.game.playerX ? '❎' : '⭕'})`;
     }
     
     const str = `
@@ -201,7 +201,7 @@ ${arr.slice(6).join('')}
 ▢ Player ❎: @${room.game.playerX.split('@')[0]}
 ▢ Player ⭕: @${room.game.playerO.split('@')[0]}
 
-${!winner && !isTie ? '• Type a number (1-9) to make your move\n• Type *surrender* to give up' : ''}
+${!winner && !isTie ? '• Hərəkətinizi yerinə yetirmək üçün rəqəm (1-9) yazın\n• Vaz keçmək üçün *təslim* yazın' : ''}
 `;
     
     const mentions = [
@@ -228,7 +228,7 @@ ${!winner && !isTie ? '• Type a number (1-9) to make your move\n• Type *surr
     
     return true;
   } catch (error) {
-    console.error('Error in tictactoe move:', error);
+    console.error('Titakto hərəkətində səhv:', error);
     return false;
   }
 }
