@@ -3,8 +3,8 @@
  */
 
 module.exports = {
-    name: 'grouplink',
-    aliases: ['link', 'invite'],
+    name: 'Link',
+    aliases: ['glink', 'invite'],
     category: 'admin',
     description: 'Get group invite link',
     usage: '.grouplink',
@@ -17,15 +17,15 @@ module.exports = {
         const code = await sock.groupInviteCode(extra.from);
         const link = `https://chat.whatsapp.com/${code}`;
         
-        let text = `🔗 *GROUP INVITE LINK*\n\n`;
-        text += `📱 Group: ${extra.groupMetadata.subject}\n`;
+        let text = `🔗 *QRUP DƏVƏT LİNKİ*\n\n`;
+        text += `📱 Qrup: ${extra.groupMetadata.subject}\n`;
         text += `🔗 Link: ${link}\n\n`;
-        text += `⚠️ Don't share this link publicly!`;
+        text += `⚠️ Bu linki açıq şəkildə paylaşmayın!`;
         
         await extra.reply(text);
         
       } catch (error) {
-        await extra.reply(`❌ Error: ${error.message}`);
+        await extra.reply(`❌ Xəta: ${error.message}`);
       }
     }
   };
