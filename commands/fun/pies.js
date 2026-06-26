@@ -5,7 +5,7 @@
 const axios = require('axios');
 
 const BASE = 'https://api.shizo.top/pies';
-const VALID_COUNTRIES = ['india','malaysia', 'thailand', 'china', 'indonesia', 'japan', 'korea', 'vietnam'];
+const VALID_COUNTRIES = ['Azerbaijan','malaysia', 'thailand', 'china', 'indonesia', 'japan', 'korea', 'vietnam'];
 
 module.exports = {
   name: 'pies',
