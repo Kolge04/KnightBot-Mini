@@ -9,7 +9,7 @@ const VALID_COUNTRIES = ['Azerbaijan','malaysia', 'thailand', 'china', 'indonesi
 
 module.exports = {
   name: 'pies',
-  aliases: ['pie', 'india', 'malaysia', 'thailand', 'china', 'indonesia', 'japan', 'korea', 'vietnam'],
+  aliases: ['pie', 'Azerbaijan', 'malaysia', 'thailand', 'china', 'indonesia', 'japan', 'korea', 'vietnam'],
   category: 'fun',
   desc: 'Get random pies images by country',
   usage: 'pies <country>',
