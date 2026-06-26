@@ -3,7 +3,7 @@
  */
 
 module.exports = {
-    name: 'mute',
+    name: 'lock',
     aliases: ['close', 'closegroup'],
     category: 'admin',
     description: 'Close group (only admins can send messages)',
@@ -15,10 +15,10 @@ module.exports = {
     async execute(sock, msg, args, extra) {
       try {
         await sock.groupSettingUpdate(extra.from, 'announcement');
-        await extra.reply('🔒 Group has been closed!\n\nOnly admins can send messages now.');
+        await extra.reply('🔒 Qrup bağlıdır! \n\nArtıq yalnız administratorlar mesaj göndərə bilər.');
         
       } catch (error) {
-        await extra.reply(`❌ Error: ${error.message}`);
+        await extra.reply(`❌ Xəta: ${error.message}`);
       }
     }
   };
