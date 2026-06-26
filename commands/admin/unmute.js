@@ -3,11 +3,11 @@
  */
 
 module.exports = {
-    name: 'unmute',
+    name: 'unlock',
     aliases: ['open', 'opengroup'],
     category: 'admin',
     description: 'Open group (all members can send messages)',
-    usage: '.unmute',
+    usage: '.unlock',
     groupOnly: true,
     adminOnly: true,
     botAdminNeeded: true,
@@ -15,10 +15,10 @@ module.exports = {
     async execute(sock, msg, args, extra) {
       try {
         await sock.groupSettingUpdate(extra.from, 'not_announcement');
-        await extra.reply('🔓 Group has been opened!\n\nAll members can send messages now.');
+        await extra.reply('🔓 Qrup açıldı!\n\nBütün üzvlər indi mesaj göndərə bilər.');
         
       } catch (error) {
-        await extra.reply(`❌ Error: ${error.message}`);
+        await extra.reply(`❌ Xəta: ${error.message}`);
       }
     }
   };
