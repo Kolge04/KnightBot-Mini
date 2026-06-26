@@ -27,7 +27,8 @@ module.exports = {
 
     // VERSION
     VERSION: '1.0.1',
-
+ 
+    BotNumber: 994775748404,  // Botun nomresi- olke kodunu yaz amma + qoyma
 
     // SHAZAM 
     ACR_HOST: 'identify-ap-southeast-1.acrcloud.com',
