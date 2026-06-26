@@ -1,7 +1,7 @@
 /**
  * EXIF Metadata Utilities for Stickers
  */
-
+const config = require('../../config');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -22,7 +22,7 @@ async function writeExifImg(img, metadata) {
   
   const json = {
     'sticker-pack-id': crypto.randomBytes(32).toString('hex'),
-    'sticker-pack-name': packname || 'Knight Bot',
+    'sticker-pack-name': packname || config.botName,
     emojis: ['🤖'],
   };
   
@@ -96,7 +96,7 @@ async function writeExifVid(videoBuffer, metadata) {
     
     const json = {
       'sticker-pack-id': crypto.randomBytes(32).toString('hex'),
-      'sticker-pack-name': packname || 'Knight Bot',
+      'sticker-pack-name': packname || config.botName,
       emojis: ['🤖'],
     };
     
