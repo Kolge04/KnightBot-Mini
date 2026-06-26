@@ -1,7 +1,7 @@
 /**
  * ATTP - Animated Text to Picture Sticker
  */
-
+const config = require('../../config');
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -27,7 +27,7 @@ module.exports = {
       
       try {
         const mp4Buffer = await renderBlinkingVideoWithFfmpeg(text);
-        const webpBuffer = await writeExifVid(mp4Buffer, { packname: 'Knight Bot' });
+        const webpBuffer = await writeExifVid(mp4Buffer, { packname: config.botName });
         await sock.sendMessage(extra.from, { sticker: webpBuffer }, { quoted: msg });
       } catch (error) {
         console.error('attp stikerinin yaradılması xətası:', error);
