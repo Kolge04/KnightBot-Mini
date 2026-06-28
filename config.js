@@ -45,7 +45,6 @@ module.exports = {
     autoReact: false,
     autoReactMode: 'bot', // set bot or all via cmd
     autoDownload: false,
-    autoplay: false,
     
     // Group Settings Defaults
     defaultGroupSettings: {
@@ -68,7 +67,8 @@ module.exports = {
       nsfw: false,
       detect: false,
       chatbot: false,
-      autosticker: false // Auto-convert images/videos to stickers
+      autosticker: false, // Auto-convert images/videos to stickers
+      autoplay: false // 🎵 emoji trigger ilə avtomatik musiqi göndər
     },
     
     // API Keys (add your own)
