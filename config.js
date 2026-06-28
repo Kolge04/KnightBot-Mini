@@ -30,7 +30,7 @@ module.exports = {
  
     BotNumber: 994775748404,  // Botun nomresi- olke kodunu yaz amma + qoyma
 
-    Autoply: '🎵, 🎶, 🎸, 🎹\n> *musiqi, random, mahni - *',  // Autoplayda tetikleyici sozler ve simgeler 
+    Autoply: '🎵, 🎶, 🎸, 🎹\n> musiqi, random, mahni - ',  // Autoplayda tetikleyici sozler ve simgeler 
 
     // SHAZAM 
     ACR_HOST: 'identify-ap-southeast-1.acrcloud.com',
