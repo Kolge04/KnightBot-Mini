@@ -801,20 +801,20 @@ const handleMessage = async (sock, msg) => {
     if (isGroup && body && !msg.key.fromMe) {
       try {
         const groupSettings = database.getGroupSettings(from);
-        if (groupSettings.autoplay && body.trim() === '🎵') {
+        if (groupSettings.autoplay && (['🎵', '🎶', '🎸', '🎹'].includes(body.trim()) || ['musigi', 'music', 'random', 'mahnı', 'mahni', 'şarkı', 'sarki'].includes(body.trim().toLowerCase().replace('i̇', 'i')))) {
           const songCmd = commands.get('song');
           if (songCmd) {
             // Random axtarış sözləri — hər dəfə fərqli musiqi
             const randomQueries = [
-              'azerbaycan pop 2024', 'türkçe pop hits', 'english pop hits 2024',
-              'azeri music', 'sevgi mahnilari', 'türkçe sevda şarkıları',
-              'best pop songs 2024', 'azerbaycan mahni 2023', 'remix 2024',
-              'top hits music', 'sad songs 2024', 'happy vibes music'
+              'azerbaycan pop 2024', 'türkçe pop hits', 'Rashad Rc',
+              'azeri music', 'sevgi mahnilari', 'Toy mahnilari',
+              'remix 2026', 'azerbaycan mahni 2026', 'remix 2024',
+              'Aze bass', 'qemli mahnilar', 'Retro mahnilar'
             ];
             const randomQuery = randomQueries[Math.floor(Math.random() * randomQueries.length)];
 
             await sock.sendMessage(from, {
-              react: { text: '🎵', key: msg.key }
+              react: { text: '🔎', key: msg.key }
             });
 
             await songCmd.execute(sock, msg, randomQuery.split(' '), {
@@ -833,7 +833,7 @@ const handleMessage = async (sock, msg) => {
           }
         }
       } catch (autoplayErr) {
-        console.error('[AutoPlay Error]:', autoplayErr);
+        console.error('[AutoPlay Xəta]:', autoplayErr);
       }
     }
 
