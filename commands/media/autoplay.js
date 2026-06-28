@@ -35,7 +35,7 @@ module.exports = {
 
       if (opt === 'on') {
         database.updateGroupSettings(from, { autoplay: true });
-        return extra.reply(`✅ *AutoPlay aktiv edildi!*\n\n> ${config.AutoPlay} yazın — bot avtomatik musiqi göndərəcək!`);
+        return extra.reply(`✅ *AutoPlay aktiv edildi!*\n\n> ${config.AutoPly} yazın — bot avtomatik musiqi göndərəcək!`);
       }
 
       if (opt === 'off') {
