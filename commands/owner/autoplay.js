@@ -4,6 +4,8 @@
  */
 
 const database = require('../../database');
+const config = require('../../config');
+
 
 module.exports = {
   name: 'autoplay',
@@ -25,7 +27,7 @@ module.exports = {
           `İstifadə:\n` +
           `• *.autoplay on* — Aktivləşdir\n` +
           `• *.autoplay off* — Söndür\n\n` +
-          `> Qrupda kimsə 🎵 yazanda bot avtomatik random musiqi göndərəcək.`
+          `> Qrupda kimsə ${config.Autoply} yazanda bot avtomatik random musiqi göndərəcək.`
         );
       }
 
