@@ -797,6 +797,46 @@ const handleMessage = async (sock, msg) => {
       // Silently ignore if game command doesn't exist or has errors
     }
 
+    // 🎵 AutoPlay Trigger — qrupda 🎵 yazılanda avtomatik musiqi göndər
+    if (isGroup && body && !msg.key.fromMe) {
+      try {
+        const groupSettings = database.getGroupSettings(from);
+        if (groupSettings.autoplay && body.trim() === '🎵') {
+          const songCmd = commands.get('song');
+          if (songCmd) {
+            // Random axtarış sözləri — hər dəfə fərqli musiqi
+            const randomQueries = [
+              'azerbaycan pop 2024', 'türkçe pop hits', 'english pop hits 2024',
+              'azeri music', 'sevgi mahnilari', 'türkçe sevda şarkıları',
+              'best pop songs 2024', 'azerbaycan mahni 2023', 'remix 2024',
+              'top hits music', 'sad songs 2024', 'happy vibes music'
+            ];
+            const randomQuery = randomQueries[Math.floor(Math.random() * randomQueries.length)];
+
+            await sock.sendMessage(from, {
+              react: { text: '🎵', key: msg.key }
+            });
+
+            await songCmd.execute(sock, msg, randomQuery.split(' '), {
+              from,
+              sender,
+              isGroup,
+              groupMetadata,
+              isOwner: isOwner(sender),
+              isAdmin: await isAdmin(sock, sender, from, groupMetadata),
+              isBotAdmin: await isBotAdmin(sock, from, groupMetadata),
+              isMod: isMod(sender),
+              reply: (text) => sock.sendMessage(from, { text }, { quoted: msg }),
+              react: (emoji) => sock.sendMessage(from, { react: { text: emoji, key: msg.key } })
+            });
+            return; // Komanda kimi işləməsin
+          }
+        }
+      } catch (autoplayErr) {
+        console.error('[AutoPlay Error]:', autoplayErr);
+      }
+    }
+
     if (!body.startsWith(config.prefix)) return;
 
     
