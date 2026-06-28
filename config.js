@@ -45,6 +45,7 @@ module.exports = {
     autoReact: false,
     autoReactMode: 'bot', // set bot or all via cmd
     autoDownload: false,
+    autoplay: false,
     
     // Group Settings Defaults
     defaultGroupSettings: {
