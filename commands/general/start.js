@@ -26,10 +26,8 @@ module.exports = {
       // 💻 İstifadəçi paneli tərtibatı
       let startText = `✨ *Salam, ${senderTag}!* 👋\n\n`;
       startText += `🤖 *Mən:* ${config.botName}\n`;
-        startText += `👑 *Rəhbər:* ${config.ownerName}\n`;
       startText += `⚡ *Prefix:* \` ${config.prefix} \` \n`;
-      startText += `⏳ *Aktivlik Vaxtı:* \`${uptimeString}\`\n`;
-      startText += `📊 *Sistem Modu:* ${config.selfMode ? '🔒 _Self (Özəl)_' : '🔓 _Public (Açıq)_'}\n\n`;
+     
 
       startText += `⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n\n`;
       startText += `📜 *Əsas Komandalar:* \n`;
