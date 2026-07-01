@@ -37,8 +37,8 @@ module.exports = {
     ACR_ACCESS_KEY: 'e7ce31706d1fff7d677552b48340f9d7',
     ACR_SECRET: 'oUA8Wq3M4HQDIlSNoUIBXqAkx2jnxjHV0csxZnHR',
 
-    // TikTok repo linki ucun doldur
-    TIKTOK_SITE: "https://w-ptt-bot.vercel.app/",
+    // TikTok mini app sayit linki
+    TIKTOK_SITE: "https://tik-tok-url.vercel.app/",
 
     
     // Bot Behavior
