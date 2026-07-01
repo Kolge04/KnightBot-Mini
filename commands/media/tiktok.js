@@ -144,7 +144,7 @@ module.exports = {
             
             const botName = config.botName.toUpperCase();
             const caption = title 
-              ? `*Loqosuz TikTok Videosu*\n\n📝 Başlıq: ${title}\n\n🎉 TikTok video yükləmə saytı\n${config.TIKTOK_SITE}\n\n🤖 @${botName}`
+              ? `*Loqosuz TikTok Videosu*\n\n📝 Başlıq: ${title}\n\n🎉 TikTok video yükləmə saytı\n${config.TIKTOK_SITE}`
               : `*Loqosuz TikTok Videosu*\n\n🎉 TikTok video yükləmə saytı\n${config.TIKTOK_SITE}`;
             
             await sock.sendMessage(msg.key.remoteJid, {
@@ -160,7 +160,7 @@ module.exports = {
             try {
               const botName = config.botName.toUpperCase();
               const caption = title 
-              ? `*Loqosuz TikTok Videosu*\n\n📝 Başlıq: ${title}\n\n🎉 TikTok video yükləmə saytı\n${config.TIKTOK_SITE}\n\n🤖 @${botName}`
+              ? `*Loqosuz TikTok Videosu*\n\n📝 Başlıq: ${title}\n\n🎉 TikTok video yükləmə saytı\n${config.TIKTOK_SITE}`
               : `*Loqosuz TikTok Videosu*\n\n🎉 TikTok video yükləmə saytı\n${config.TIKTOK_SITE}`;
               
               await sock.sendMessage(msg.key.remoteJid, {
