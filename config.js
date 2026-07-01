@@ -37,6 +37,10 @@ module.exports = {
     ACR_ACCESS_KEY: 'e7ce31706d1fff7d677552b48340f9d7',
     ACR_SECRET: 'oUA8Wq3M4HQDIlSNoUIBXqAkx2jnxjHV0csxZnHR',
 
+    // TikTok repo linki ucun doldur
+    GITHUB_NAME: "kolge04",
+    GITHUB_REPO: "WPttBot",
+
     
     // Bot Behavior
     selfMode: false, // Private mode - only owner can use commands
