@@ -38,8 +38,7 @@ module.exports = {
     ACR_SECRET: 'oUA8Wq3M4HQDIlSNoUIBXqAkx2jnxjHV0csxZnHR',
 
     // TikTok repo linki ucun doldur
-    GITHUB_NAME: "kolge04",
-    GITHUB_REPO: "WPttBot",
+    TIKTOK_SITE: "https://w-ptt-bot.vercel.app/",
 
     
     // Bot Behavior
