@@ -36,7 +36,7 @@ module.exports = {
       startText += `🔹 \`${config.prefix}game\` - Oyun meynusunu aç`;
       
       
-      startText += `\n\n> 💡 Ətrafl məlumat üçün;  `.menu` yaza bilərsiniz.`;
+      startText += `\n\n> 💡 Ətraflı məlumat üçün; \`${config.prefix}menu\` yaza bilərsiniz.`;
 
       // Əgər qrupdursa, qrup adını da mesaja gözəl şəkildə əlavə edək
       if (extra.isGroup && extra.groupMetadata) {
