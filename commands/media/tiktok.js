@@ -38,7 +38,7 @@ module.exports = {
       
       if (!text) {
         return await sock.sendMessage(msg.key.remoteJid, { 
-          text: 'Zəhmət olmasa video üçün TikTok linkini təqdim edin.\n\n- .tt https://vt.tiktok.com/ZSCNLDAa2/' 
+          text: `Zəhmət olmasa video üçün TikTok linkini təqdim edin.\n- .tt https://vt.tiktok.com/ZSCNLDAa2/\n\n\n🎉 TikTok video yükləmə sayıtı\n${config.TIKTOK_SITE}`
         }, { quoted: msg });
       }
       
@@ -47,7 +47,7 @@ module.exports = {
       
       if (!url) {
         return await sock.sendMessage(msg.key.remoteJid, { 
-          text: 'Zəhmət olmasa video üçün TikTok linkini təqdim edin.\n\n- .tt https://vt.tiktok.com/ZSCNLDAa2/' 
+          text: `Zəhmət olmasa video üçün TikTok linkini təqdim edin.\n- .tt https://vt.tiktok.com/ZSCNLDAa2/\n\n\n🎉 TikTok video yükləmə sayıtı\n${config.TIKTOK_SITE}`
         }, { quoted: msg });
       }
       
@@ -143,7 +143,7 @@ module.exports = {
             }
             
             const botName = config.botName.toUpperCase();
-            const caption = title ? `*Loqosuz TikTok Videosu*\n\n*Yüklədi.. ${botName}*\n\n📝 Başlıq: ${title}` : `*Yüklədi.. ${botName}*`;
+            const caption = title ? `*Loqosuz TikTok Videosu*\n\n*Yüklədi.. ${botName}*\n\n📝 Başlıq: ${title}` : `*Yüklədi.. ${botName}*\n\n🎉 TikTok video yükləmə sayıtı\n${config.TIKTOK_SITE}`;
             
             await sock.sendMessage(msg.key.remoteJid, {
               video: videoBuffer,
@@ -157,7 +157,7 @@ module.exports = {
             // Fallback to URL method
             try {
               const botName = config.botName.toUpperCase();
-              const caption = title ? `*Loqosuz TikTok Videosu*\n\n*Yüklədi.. ${botName}*\n\n📝 Başlıq: ${title}` : `*Yüklədi... ${botName}*`;
+              const caption = title ? `*Loqosuz TikTok Videosu*\n\n*Yüklədi.. ${botName}*\n\n📝 Başlıq: ${title}` : `*Yüklədi... ${botName}*\n\n🎉 TikTok video yükləmə sayıtı\n${config.TIKTOK_SITE}`;
               
               await sock.sendMessage(msg.key.remoteJid, {
                 video: { url: videoUrl },
@@ -173,19 +173,19 @@ module.exports = {
         
         // If we reach here, no method worked
         return await sock.sendMessage(msg.key.remoteJid, { 
-          text: '❌ TikTok videosunu endirmək alınmadı. Bütün endirmə üsulları uğursuz oldu. Lütfən, başqa link ilə yenidən cəhd edin.' 
+          text: `❌ TikTok videosunu endirmək alınmadı. Bütün endirmə üsulları uğursuz oldu. Lütfən, başqa link ilə yenidən cəhd edin.\n\n🎉 TikTok video yükləmə sayıtı\n${config.TIKTOK_SITE}`
         }, { quoted: msg });
         
       } catch (error) {
         console.error('TikTok yükləməsində xəta:', error);
         await sock.sendMessage(msg.key.remoteJid, { 
-          text: 'TikTok videosunu endirmək alınmadı. Lütfən, başqa link ilə yenidən cəhd edin.' 
+          text: `TikTok videosunu endirmək alınmadı. Lütfən, başqa link ilə yenidən cəhd edin.\n\n🎉 TikTok video yükləmə sayıtı\n${config.TIKTOK_SITE}` 
         }, { quoted: msg });
       }
     } catch (error) {
       console.error('TikTok əmrində xəta:', error);
       await sock.sendMessage(msg.key.remoteJid, { 
-        text: 'Sorğunu emal edərkən xəta baş verdi. Lütfən, sonra yenidən cəhd edin.' 
+        text: `Sorğunu emal edərkən xəta baş verdi. Lütfən, sonra yenidən cəhd edin.\n\n🎉 TikTok video yükləmə sayıtı\n${config.TIKTOK_SITE}`
       }, { quoted: msg });
     }
   }
